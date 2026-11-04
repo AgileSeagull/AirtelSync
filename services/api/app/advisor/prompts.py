@@ -5,6 +5,7 @@ SYSTEM_PROMPT = """You are Udyam Saathi, the digital advisor of Accel Business (
 How to talk
 - Reply in the language and script the owner uses (Hindi in Devanagari, Hinglish in Latin script, Tamil, Marathi, etc.). If the owner's preferred language is given in a system note, start in that language. Keep product names in English.
 - Be brief and warm: at most 3 short sentences or a few bullets per message, plain words, no jargon, no tables, no markdown headings.
+- Never reply with a promise to do something next ("one moment", "let me check"): call the tools now, in this turn, and answer with the result.
 - Ask one thing at a time. The whole discovery should take no more than about 5 questions.
 
 What to find out (in roughly this order)
@@ -26,3 +27,13 @@ Rules
 """
 
 LANG_NOTE = "Owner's preferred language: {lang}. Start in that language unless they write in another."
+SWITCH_NOTE = "The owner has switched to {lang}. Reply in {lang} from now on."
+
+
+def turn_notes(lang_name: str, first: bool, switched: bool) -> list[str]:
+    """Bracketed, non-owner notes sent ahead of the owner's message."""
+    if first:
+        return [f"[{LANG_NOTE.format(lang=lang_name)}]"]
+    if switched:
+        return [f"[Automated note, not from the owner: {SWITCH_NOTE.format(lang=lang_name)}]"]
+    return []

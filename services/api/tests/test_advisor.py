@@ -137,8 +137,53 @@ def test_llm_failure_falls_back_to_scripted(fake_llm, monkeypatch):
     monkeypatch.setattr(llm, "_create", boom)
     s = service.start("en")
     reply, mode = asyncio.run(service.message(s, "kirana store in Patna"))
-    assert mode == "scripted" and s.llm_disabled
+    # a transient failure costs one turn only: the LLM is tried again next turn, with the
+    # scripted exchange in its history
+    assert mode == "scripted" and not s.llm_disabled
     assert s.profile["business_type"] == "Kirana store"
+    assert [m["role"] for m in s.llm_messages] == ["user", "assistant"]
+    assert s.llm_messages[1]["content"][0]["text"] == reply
+
+    sent = []
+
+    async def ok(messages):
+        sent.append(json.loads(json.dumps(messages)))
+        return text("Got it.")
+
+    monkeypatch.setattr(llm, "_create", ok)
+    reply, mode = asyncio.run(service.message(s, "5 people"))
+    assert mode == "llm:anthropic" and "kirana" in json.dumps(sent[-1]).lower()
+
+
+def test_llm_bad_key_disables_llm_for_session(fake_llm, monkeypatch):
+    async def denied(messages):
+        raise llm.LLMUnavailable("invalid x-api-key", transient=False)
+
+    monkeypatch.setattr(llm, "_create", denied)
+    s = service.start("en")
+    _, mode = asyncio.run(service.message(s, "kirana store in Patna"))
+    assert mode == "scripted" and s.llm_disabled and s.llm_messages == []
+
+
+@pytest.mark.parametrize("text, current, expected", [
+    ("नमस्ते, मेरा क्लिनिक है", "en", "hi"),
+    ("We have 6 staff, one location", "hi", "en"),
+    ("mera clinic Pune mein hai", "en", "en"),
+    ("mera clinic Pune mein hai", "hi", "hi"),
+    ("27AAPFU0939F1ZV", "hi", "hi"),
+    ("CCTV WiFi", "hi", "hi"),
+    ("எனக்கு கடை உள்ளது", "en", "ta"),
+])
+def test_detect_lang(text, current, expected):
+    assert nlu.detect_lang(text, current) == expected
+
+
+def test_session_language_follows_owner_both_ways():
+    s = service.start("en")
+    asyncio.run(service.message(s, "नमस्ते, मेरा पुणे में एक डेंटल क्लिनिक है"))
+    assert s.lang == "hi"
+    reply, _ = asyncio.run(service.message(s, "We have 6 staff and one location"))
+    assert s.lang == "en" and not any("ऀ" <= ch <= "ॿ" for ch in reply)
 
 
 def test_tool_error_is_returned_to_model(fake_llm):
@@ -195,9 +240,11 @@ def fake_gemini(monkeypatch):
     monkeypatch.setenv("GEMINI_API_KEY", "test-key")
     script, sent = [], []
 
-    async def fake_generate(contents):
+    async def fake_generate(contents, model=llm_gemini.MODEL):
         sent.append([c.model_dump(mode="json", exclude_none=True) for c in contents])
         step = script.pop(0)
+        if isinstance(step, Exception):
+            raise step
         return step(sent[-1]) if callable(step) else step
 
     monkeypatch.setattr(llm_gemini, "_generate", fake_generate)
@@ -247,10 +294,74 @@ def test_gemini_guard_and_tool_error(fake_gemini):
 
 
 def test_gemini_failure_falls_back(fake_gemini, monkeypatch):
-    async def boom(contents):
+    async def boom(contents, model=None):
         raise llm_gemini.GeminiUnavailable("quota")
 
     monkeypatch.setattr(llm_gemini, "_generate", boom)
     s = service.start("en")
     reply, mode = asyncio.run(service.message(s, "kirana store in Patna"))
-    assert mode == "scripted" and s.llm_disabled
+    assert mode == "scripted" and not s.llm_disabled
+    assert [c["role"] for c in s.gemini_contents] == ["user", "model"]
+
+
+def _busy():
+    from google.genai import errors as gerr
+    return gerr.ServerError(503, {"error": {"code": 503, "message": "high demand", "status": "UNAVAILABLE"}})
+
+
+def test_gemini_busy_model_moves_to_next_in_chain(fake_gemini, monkeypatch):
+    script, sent = fake_gemini
+    monkeypatch.setattr(llm_gemini, "MODEL", "model-a")
+    monkeypatch.setattr(llm_gemini, "FALLBACK_MODELS", ["model-b"])
+    used = []
+    real = llm_gemini._generate
+
+    async def spy(contents, model=None):
+        used.append(model)
+        return await real(contents, model)
+
+    monkeypatch.setattr(llm_gemini, "_generate", spy)
+    script += [
+        g_call("update_profile", {"business_type": "Salon", "city": "Pune", "employees": 3}, 1),
+        _busy(),  # model-a fails mid-turn → turn rolled back and replayed on model-b
+        g_call("update_profile", {"business_type": "Salon", "city": "Pune", "employees": 3}, 2),
+        g_text("How many locations do you have?"),
+    ]
+    s = service.start("en")
+    reply, mode = asyncio.run(service.message(s, "salon pune 3 people"))
+    assert mode == "llm:gemini" and used == ["model-a", "model-a", "model-b", "model-b"]
+    assert s.gemini_model == "model-b"
+    # model-b's request starts the turn from scratch (no half-finished model-a turn) and
+    # carries no thought signatures from model-a
+    assert len(sent[2]) == 1 and "thought_signature" not in json.dumps(sent[2])
+    assert llm_gemini.model_chain(s) == ["model-b", "model-a"]
+
+
+def test_gemini_bad_request_is_not_retried(fake_gemini, monkeypatch):
+    from google.genai import errors as gerr
+    script, sent = fake_gemini
+    script += [gerr.ClientError(400, {"error": {"code": 400, "message": "API key not valid", "status": "INVALID_ARGUMENT"}})]
+    s = service.start("en")
+    _, mode = asyncio.run(service.message(s, "salon pune 3 people"))
+    assert mode == "scripted" and s.llm_disabled and len(sent) == 1
+
+
+def test_llm_reply_markdown_is_flattened(fake_llm):
+    script, _ = fake_llm
+    script += [text("## Plan\nOur **Recommended bundle** suits you.")]
+    s = service.start("en")
+    reply, _ = asyncio.run(service.message(s, "hello"))
+    assert reply == "Plan\nOur Recommended bundle suits you."
+
+
+def test_slow_llm_turn_times_out_to_scripted(fake_llm, monkeypatch):
+    async def slow(messages):
+        await asyncio.sleep(5)
+
+    monkeypatch.setattr(llm, "_create", slow)
+    monkeypatch.setattr(llm, "TURN_TIMEOUT", 0.2)
+    s = service.start("en")
+    reply, mode = asyncio.run(service.message(s, "kirana store in Patna"))
+    assert mode == "scripted" and not s.llm_disabled
+    # only the completed (scripted) exchange is in the LLM history
+    assert [m["role"] for m in s.llm_messages] == ["user", "assistant"]

@@ -23,13 +23,20 @@ services/api/         FastAPI backend
 ## Advisor modes
 
 - **LLM mode**: put `GEMINI_API_KEY` in `services/api/.env` (template: `.env.example`; the file is git-ignored and
-  loaded automatically). Default model `gemini-flash-latest` (override with `GEMINI_MODEL`). Claude is also
+  loaded automatically). Default model `gemini-2.5-flash` (override with `GEMINI_MODEL`); when it is busy or
+  rate-limited (503/429) the turn moves to `GEMINI_FALLBACK_MODELS` (default `gemini-flash-lite-latest`,
+  `gemini-flash-latest`). The free tier allows about 5 requests per minute per model, and one chat turn can use
+  2–4 (tool calls), so the fallback chain matters on a free key. Claude is also
   supported (`ANTHROPIC_API_KEY`, `claude-opus-5-5`); `UDYAM_LLM_PROVIDER` picks one when both keys are set.
   The model talks; tools (`lookup_gstin`, `update_profile`, `recommend_bundle`, `check_product`,
   `handoff_to_human`) call the engine. An output guard rejects any rupee amount or product id not returned by a
   tool (one corrective retry, then fallback).
-- **Scripted mode** (no key needed): rule-based English/Hindi/Hinglish slot filling over the same tools. Also the
-  automatic fallback if the LLM errors mid-session, so a live demo never dead-ends.
+- **Scripted mode** (no key needed): rule-based English/Hindi/Hinglish slot filling over the same tools. It also
+  answers any single turn the LLM cannot (error, or no reply within `UDYAM_LLM_TURN_TIMEOUT`, default 35 s); that
+  exchange is added to the LLM's history and the next turn goes back to the LLM. Only a bad key or bad request
+  switches the LLM off for the rest of the session, so a live demo never dead-ends.
+- **Language follows the owner** turn by turn: Hindi (Devanagari) or another Indic script switches the app and
+  the advisor to it, clearly English text switches back, and Hinglish, numbers, names or a GSTIN leave it as is.
 
 ```bash
 cd services/api

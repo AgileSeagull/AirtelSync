@@ -29,10 +29,12 @@ class AdvisorSession(BaseModel):
     transcript: list[Turn] = Field(default_factory=list)  # what the owner saw
     llm_messages: list[dict[str, Any]] = Field(default_factory=list)  # Claude API history (append-only)
     gemini_contents: list[dict[str, Any]] = Field(default_factory=list)  # Gemini API history (append-only)
+    gemini_model: str | None = None
+    lang_switched: bool = False  # the owner changed language in the current message  # model that answered the last Gemini turn
     recommendation: dict[str, Any] | None = None
     selected_tier: str | None = None
     handoff: dict[str, Any] | None = None
-    llm_disabled: bool = False  # set after an LLM failure; the rest of the session runs scripted
+    llm_disabled: bool = False  # set after a permanent LLM failure (bad key); the rest of the session runs scripted
     status: Literal["open", "recommended", "quoted", "handoff", "converted"] = "open"
 
     def save(self) -> None:

@@ -156,3 +156,36 @@ def extract(text: str, last_asked: str | None) -> dict[str, Any]:
     if re.search(r"cheap|budget|kam|सस्ता|कम ", t):
         out["cheaper"] = True
     return out
+
+
+# ------------------------------------------------------------------ language of a message
+_SCRIPTS = [("ऀ", "ॿ", "hi"), ("ঀ", "৿", "bn"), ("਀", "੿", "pa"), ("઀", "૿", "gu"),
+            ("஀", "௿", "ta"), ("ఀ", "౿", "te"), ("ಀ", "೿", "kn"), ("ഀ", "ൿ", "ml")]
+_HINGLISH = set("""hai hain mera meri mere hamara humara hamari hamare mujhe humein chahiye kitna kitne kitni nahi nahin
+haan ji mein aur kya hoon hun hu karte karta karti wala wali wale dukaan dukan log accha acha theek thik abhi kaise
+kyun lagta chalega mahina mahine paise bhi tha thi hoga hogi kuch sab""".split())
+_ENGLISH = set("""i we my our you your is are am was the a an and or have has had need needs want wants please
+yes no not it this that there do does how what which who for with to of in on at can could would will should staff
+people employees shop store office clinic business branch branches location locations about current currently pay
+monthly month internet use using""".split())
+
+
+def detect_lang(text: str, current: str) -> str:
+    """Language the owner just wrote in. An Indic script decides it outright; Latin text switches
+    to English only when it clearly reads as English (Hinglish keeps the current language);
+    numbers, names, a GSTIN or a one-word answer never switch it."""
+    counts: dict[str, int] = {}
+    for ch in text:
+        for lo, hi, code in _SCRIPTS:
+            if lo <= ch <= hi:
+                counts[code] = counts.get(code, 0) + 1
+                break
+    if counts:
+        return max(counts, key=counts.get)
+    words = re.findall(r"[a-z']+", text.lower())
+    if any(w in _HINGLISH for w in words):
+        return current
+    en = sum(w in _ENGLISH for w in words)
+    if en >= 2 or (en >= 1 and len(words) >= 3):
+        return "en"
+    return current

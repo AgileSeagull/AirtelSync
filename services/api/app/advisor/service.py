@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 import logging
+import re
 
 from . import llm, profile_slots, scripted
+from .nlu import detect_lang
 from .session import LANGS, AdvisorSession, Turn
 
 log = logging.getLogger("advisor")
@@ -22,20 +24,35 @@ def start(lang: str = "en", channel: str = "web", prefill: dict | None = None) -
 async def message(s: AdvisorSession, text: str) -> tuple[str, str]:
     text = (text or "").strip()[:2000]
     s.transcript.append(Turn(role="user", text=text))
+    # The app's language follows the owner: cards, buttons and voice input switch with them.
+    new_lang = detect_lang(text, s.lang)
+    s.lang_switched, s.lang = new_lang != s.lang, new_lang
     mode = "scripted"
     reply = None
-    if llm.available() and not s.llm_disabled:
+    use_llm = llm.available() and not s.llm_disabled
+    if use_llm:
         try:
-            reply = await llm.respond(s, text)
+            reply = _plain(await llm.respond(s, text))
             mode = f"llm:{llm.provider()}"
         except llm.LLMUnavailable as e:
-            log.warning("LLM unavailable for session %s, continuing scripted: %s", s.id, e)
-            s.llm_disabled = True
+            # A busy or rate-limited model only costs this one turn; a bad key ends LLM use.
+            log.warning("LLM unavailable for session %s (transient=%s), answering this turn scripted: %s",
+                        s.id, e.transient, e)
+            if not e.transient:
+                s.llm_disabled = True
     if reply is None:
         reply = scripted.respond(s, text)
+        if use_llm and not s.llm_disabled:
+            llm.record_scripted_turn(s, text, reply)
     s.transcript.append(Turn(role="assistant", text=reply, mode=mode))
     s.save()
     return reply, mode
+
+
+def _plain(text: str) -> str:
+    """The chat shows plain text: drop markdown emphasis and heading markers models sometimes add."""
+    text = re.sub(r"\*\*(.+?)\*\*|__(.+?)__", lambda m: m.group(1) or m.group(2), text)
+    return re.sub(r"(?m)^#{1,6}\s+", "", text)
 
 
 def view(s: AdvisorSession) -> dict:

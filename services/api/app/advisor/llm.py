@@ -1,6 +1,7 @@
 """Claude-powered advisor: a manual tool-use loop so we control state, the guard and fallbacks."""
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import os
@@ -9,7 +10,7 @@ from typing import Any
 import anthropic
 
 from . import guard
-from .prompts import LANG_NOTE, SYSTEM_PROMPT
+from .prompts import SYSTEM_PROMPT, turn_notes
 from .session import LANGS, AdvisorSession
 from .tools import TOOL_DEFS, ToolError, run_tool
 
@@ -18,6 +19,7 @@ log = logging.getLogger("advisor.llm")
 MODEL = os.getenv("UDYAM_LLM_MODEL", "claude-opus-5-5")
 EFFORT = os.getenv("UDYAM_LLM_EFFORT", "low")  # chat turns: keep latency low
 MAX_TOOL_ROUNDS = 6
+TURN_TIMEOUT = float(os.getenv("UDYAM_LLM_TURN_TIMEOUT", "35"))  # then the scripted advisor answers this turn
 
 _client: anthropic.AsyncAnthropic | None = None
 
@@ -49,7 +51,9 @@ def client() -> anthropic.AsyncAnthropic:
 
 
 class LLMUnavailable(Exception):
-    pass
+    def __init__(self, msg: str, transient: bool = True):
+        super().__init__(msg)
+        self.transient = transient  # False: bad key / bad request; stop trying for this session
 
 
 def _system_blocks() -> list[dict]:
@@ -75,21 +79,52 @@ def _dump(content) -> list[dict]:
 
 
 async def respond(session: AdvisorSession, user_text: str) -> str:
+    """One owner turn on the configured LLM, within TURN_TIMEOUT seconds. On any failure the
+    turn is removed from the stored history, so it only ever holds completed turns."""
+    hist = session.gemini_contents if provider() == "gemini" else session.llm_messages
+    turn_start = len(hist)
+    try:
+        return await asyncio.wait_for(_respond(session, user_text), TURN_TIMEOUT)
+    except TimeoutError as e:
+        del hist[turn_start:]
+        raise LLMUnavailable(f"no reply within {TURN_TIMEOUT:.0f}s") from e
+    except LLMUnavailable:
+        del hist[turn_start:]
+        raise
+
+
+async def _respond(session: AdvisorSession, user_text: str) -> str:
     if provider() == "gemini":
         from . import llm_gemini
         try:
             return await llm_gemini.respond(session, user_text)
         except llm_gemini.GeminiUnavailable as e:
-            raise LLMUnavailable(str(e)) from e
+            raise LLMUnavailable(str(e), transient=e.transient) from e
     return await respond_claude(session, user_text)
+
+
+def record_scripted_turn(session: AdvisorSession, user_text: str, reply: str) -> None:
+    """When a turn was answered by the scripted advisor, add it to the LLM history so the model
+    has the full conversation when it answers the next turn."""
+    lang = LANGS.get(session.lang, "English")
+    if provider() == "gemini":
+        hist = session.gemini_contents
+        notes = turn_notes(lang, first=not hist, switched=session.lang_switched)
+        hist.append({"role": "user", "parts": [{"text": n} for n in notes] + [{"text": user_text}]})
+        hist.append({"role": "model", "parts": [{"text": reply}]})
+    elif provider() == "anthropic":
+        msgs = session.llm_messages
+        notes = turn_notes(lang, first=not msgs, switched=session.lang_switched)
+        msgs.append({"role": "user", "content": [{"type": "text", "text": n} for n in notes] + [{"type": "text", "text": user_text}]})
+        msgs.append({"role": "assistant", "content": [{"type": "text", "text": reply}]})
 
 
 async def respond_claude(session: AdvisorSession, user_text: str) -> str:
     """Run one owner turn on Claude. History is append-only (thinking blocks stay valid)."""
     msgs = session.llm_messages
-    if not msgs:
-        msgs.append({"role": "user", "content": [{"type": "text", "text": f"[{LANG_NOTE.format(lang=LANGS.get(session.lang, 'English'))}]"},
-                                                 {"type": "text", "text": user_text}]})
+    notes = turn_notes(LANGS.get(session.lang, "English"), first=not msgs, switched=session.lang_switched)
+    if notes:
+        msgs.append({"role": "user", "content": [{"type": "text", "text": n} for n in notes] + [{"type": "text", "text": user_text}]})
     else:
         msgs.append({"role": "user", "content": user_text})
 
@@ -98,12 +133,11 @@ async def respond_claude(session: AdvisorSession, user_text: str) -> str:
     for _ in range(MAX_TOOL_ROUNDS + 2):
         try:
             resp = await _create(msgs)
-        except (anthropic.APIConnectionError, anthropic.RateLimitError, anthropic.InternalServerError,
-                anthropic.AuthenticationError, anthropic.PermissionDeniedError) as e:
+        except (anthropic.APIConnectionError, anthropic.RateLimitError, anthropic.InternalServerError) as e:
             raise LLMUnavailable(str(e)) from e
         except anthropic.APIStatusError as e:
             log.error("advisor API error %s request_id=%s", e.status_code, getattr(e, "request_id", None))
-            raise LLMUnavailable(str(e)) from e
+            raise LLMUnavailable(str(e), transient=e.status_code in (408, 409, 429) or e.status_code >= 500) from e
 
         msgs.append({"role": "assistant", "content": _dump(resp.content)})
         if resp.stop_reason == "refusal":

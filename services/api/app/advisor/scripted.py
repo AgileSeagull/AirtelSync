@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from ..engine.models import NEEDS, SEGMENT_LABELS
 from . import nlu, profile_slots
+from .nlu import detect_lang
 from .session import AdvisorSession
 from .tools import ToolError, run_tool
 
@@ -72,14 +73,8 @@ def greeting(session: AdvisorSession) -> str:
     return _t(session, "greet")
 
 
-def _detect_lang(text: str, current: str) -> str:
-    if any("ऀ" <= ch <= "ॿ" for ch in text):
-        return "hi"
-    return current
-
-
 def respond(session: AdvisorSession, text: str) -> str:
-    session.lang = _detect_lang(text, session.lang)
+    session.lang = detect_lang(text, session.lang)
     facts = nlu.extract(text, session.last_asked)
     parts: list[str] = []
 
