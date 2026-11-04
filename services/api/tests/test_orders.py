@@ -70,3 +70,21 @@ def test_delay_flags_sla_and_notifies(client, star_order):
     t = client.post(f"/orders/{oid}/delay").json()
     assert t["sla_breach"] is True
     assert t["notifications"][-1]["event"] == "Delayed"
+
+
+def test_whatsapp_only_with_optional_consent(client):
+    oid, _ = _verified_order(client, ["37NBLXS1145E1ZU", "electronics shop", "3 people", "billing and cctv", "no"], "K12")
+    cid = client.post("/kyc/cases", json={"order_id": oid}).json()["id"]
+    client.post(f"/kyc/cases/{cid}/consent", json={"purposes": ["kyc_verification"]})  # no WhatsApp opt-in
+    client.post(f"/kyc/cases/{cid}/sample/K12")
+    client.post(f"/kyc/cases/{cid}/verify")
+    client.post(f"/kyc/cases/{cid}/esign", json={"otp": "123456"})
+    from app.orders import notify
+    msgs = notify.for_order(oid)
+    assert msgs and all(m["channel"] == "in_app" for m in msgs)
+
+
+def test_whatsapp_used_when_opted_in(star_order):
+    from app.orders import notify
+    oid, _ = star_order
+    assert all(m["channel"] == "whatsapp" for m in notify.for_order(oid))

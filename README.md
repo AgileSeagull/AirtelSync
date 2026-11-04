@@ -117,6 +117,12 @@ python docs/deck/build_deck.py "../Submission Template_Sync.pptx" docs/deck/Airt
 
 Slides use Montserrat (available in Google Slides; install it locally for PowerPoint).
 
+## Privacy & security note
+
+`docs/privacy/AirtelSync_Privacy_Security_Note.pdf`: one A4 page covering the data map, the controls built into the
+design (consent, minimisation, document protection, access and audit, safe use of AI) and what production still needs.
+Source `docs/privacy/privacy_note.html`; re-render with `services/api/.venv/bin/python docs/privacy/render.py`.
+
 ## Solution architecture
 
 `docs/architecture/AirtelSync_Solution_Architecture.pdf`: one A3 landscape page. Columns are the five journey stages

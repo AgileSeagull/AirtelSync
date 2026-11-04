@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AirtelSync — Privacy &amp; security note</title>
+<style>
+  @page { size: 210mm 297mm; margin: 0; }
+  :root { --ink: #0f2324; --body: #3a4c4d; --muted: #7b8a89; --hair: #e1e7e6; --panel: #f4f7f6; --accent: #0b5d5b; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    width: 794px; height: 1123px; overflow: hidden; background: #fff; color: var(--body);
+    font: 400 9.6px/1.42 "Noto Sans", sans-serif; padding: 32px 46px 30px; position: relative;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  h1, h2, h3, th, .eyebrow, b { font-family: Montserrat, "Noto Sans", sans-serif; color: var(--ink); }
+  .eyebrow { font-size: 8.5px; font-weight: 600; letter-spacing: 1.4px; text-transform: uppercase; color: var(--accent); }
+  h1 { margin: 6px 0 0; font-size: 21px; font-weight: 700; letter-spacing: -0.3px; }
+  .lede { margin: 6px 0 0; font-size: 10.6px; color: var(--body); max-width: 640px; }
+  h2 { margin: 0 0 8px; font-size: 11px; font-weight: 700; letter-spacing: .2px; display: flex; align-items: baseline; gap: 8px; }
+  h2 .n { font-size: 9px; color: var(--accent); font-weight: 600; }
+  section { margin-top: 14px; }
+
+  .principles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 1.5px solid var(--ink); margin-top: 14px; }
+  .principles div { padding: 9px 12px 0 0; }
+  .principles div + div { padding-left: 12px; border-left: 1px solid var(--hair); }
+  .principles b { display: block; font-size: 10.2px; margin-bottom: 2px; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 8.5px; font-weight: 600; letter-spacing: .8px; text-transform: uppercase; color: var(--muted); padding: 0 10px 5px 0; border-bottom: 1px solid var(--hair); }
+  td { vertical-align: top; padding: 5px 10px 5px 0; border-bottom: 1px solid var(--hair); }
+  td:first-child { width: 25%; }
+  td:first-child b { font-size: 9.8px; }
+  td:nth-child(2) { width: 21%; }
+  td:nth-child(3) { width: 30%; }
+  tr:last-child td { border-bottom: 0; }
+
+  .cols { display: grid; grid-template-columns: 1fr 1fr; column-gap: 26px; row-gap: 12px; }
+  .ctl h3 { margin: 0 0 3px; font-size: 10px; font-weight: 600; }
+  .ctl ul { margin: 0; padding-left: 13px; }
+  .ctl li { margin: 1.5px 0; }
+  .ctl li::marker { color: var(--accent); }
+  .mono { font-family: "JetBrains Mono", monospace; font-size: 8.8px; color: var(--ink); }
+
+  .gaps { background: var(--panel); border-radius: 10px; padding: 12px 14px 12px; }
+  .gaps table td { padding: 4px 10px 4px 0; border-bottom-color: #e3e9e8; }
+  .gaps td:first-child { width: 36%; color: var(--body); }
+  .gaps td:nth-child(2) { width: auto; }
+  .gaps th { border-bottom-color: #dbe3e2; }
+
+  footer { position: absolute; left: 46px; right: 46px; bottom: 22px; display: flex; justify-content: space-between; color: var(--muted); font-size: 8.5px; }
+</style>
+</head>
+<body>
+
+<div class="eyebrow">AirtelSync · Project Udyam Digital</div>
+<h1>Privacy &amp; security note</h1>
+<p class="lede">What the design collects from an MSME owner, why, where it goes and how long it stays, against India's Digital Personal Data Protection Act 2023 (DPDP). The controls in section 2 are built and tested in the prototype; section 3 lists what production still needs.</p>
+
+<div class="principles">
+  <div><b>Ask only what activation needs</b>About 5 questions, and no ID numbers in chat.</div>
+  <div><b>Consent before documents</b>A plain notice in the owner's language, one purpose at a time.</div>
+  <div><b>Keep documents briefly</b>Encrypted, then deleted once a decision is made.</div>
+  <div><b>AI talks, never decides</b>Prices come from rules; the LLM never sees documents.</div>
+</div>
+
+<section>
+  <h2><span class="n">01</span>Data map</h2>
+  <table>
+    <tr><th>Data</th><th>Why</th><th>Where it goes</th><th>How long</th></tr>
+    <tr><td><b>Chat and business profile</b><br>type, city, staff, sites, needs, optional GSTIN</td><td>Recommend an eligible bundle</td><td>Operational store. Chat text goes to the LLM (Gemini) with personal identifiers removed first.</td><td>Session lifetime (see production gaps)</td></tr>
+    <tr><td><b>KYC documents</b><br>GST/Udyam certificate, signatory ID, address proof</td><td>Verify the business, as telecom rules require</td><td>Encrypted vault on our server. Never sent to the LLM or shown to sales and partners.</td><td>Deleted when a verdict is reached; at most 7 days if a person must review</td></tr>
+    <tr><td><b>Verified details</b><br>extracted fields, SHA-256 fingerprint of each file</td><td>Prove what was checked</td><td>Operational store; identifiers masked on every screen</td><td>Contract term plus legal retention period</td></tr>
+    <tr><td><b>Consent record</b><br>purposes, notice version, language, time</td><td>Evidence of consent and its withdrawal</td><td>Consent ledger</td><td>As evidence, for as long as the relationship lasts</td></tr>
+    <tr><td><b>UPI mandate and lead score</b></td><td>Monthly billing; prioritise follow-up</td><td>UPI ID shown masked (<span class="mono">po•••@okbank</span>); scores visible to staff only</td><td>Contract term</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2><span class="n">02</span>Controls built into the design</h2>
+  <div class="cols">
+    <div class="ctl">
+      <h3>Consent (DPDP §§ 5–6)</h3>
+      <ul>
+        <li>Versioned notice in English or Hindi before any document: what, why, who sees it, how long, rights, grievance contact.</li>
+        <li>Separate purposes: KYC is required; WhatsApp updates and marketing start unticked. Without the WhatsApp opt-in, updates stay in the app.</li>
+        <li>Withdrawing consent before e-sign deletes the documents at once.</li>
+      </ul>
+    </div>
+    <div class="ctl">
+      <h3>Data minimisation</h3>
+      <ul>
+        <li>The advisor never asks for Aadhaar, PAN or bank details. If an owner pastes them, they are stripped (with phone numbers and UPI IDs) before the text reaches the LLM.</li>
+        <li>GSTIN is masked wherever it is shown (<span class="mono">27ABC•••••••1Z5</span>): screens, console free text and the tool results the LLM sees.</li>
+      </ul>
+    </div>
+    <div class="ctl">
+      <h3>Protection of documents</h3>
+      <ul>
+        <li>Images encrypted at rest (Fernet: AES-128-CBC with HMAC-SHA256) and purged after the decision; only extracted fields and a fingerprint remain.</li>
+        <li>Every KYC verdict lists its reasons; unclear cases go to a person rather than being rejected automatically.</li>
+      </ul>
+    </div>
+    <div class="ctl">
+      <h3>Access and accountability</h3>
+      <ul>
+        <li>Role-based console: partners see only the leads routed to them; only sales staff can decide KYC reviews.</li>
+        <li>A partner can help in assisted mode only after the owner receives a 4-digit code and chooses to share it.</li>
+        <li>Audit log of consent given and withdrawn, uploads, DigiLocker fetches, verification, review decisions, e-sign and assisted access.</li>
+      </ul>
+    </div>
+    <div class="ctl" style="grid-column: 1 / -1">
+      <h3>Safe use of AI</h3>
+      <ul>
+        <li>The LLM can only call five server-side tools. A guard rejects any reply naming a price or product no tool returned, and the server re-prices every quote, so neither the model nor the browser can set a price. Owner messages are treated as data, not instructions, to limit prompt injection.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">03</span>Prototype shortcuts and what production needs</h2>
+  <div class="gaps">
+    <table>
+      <tr><th>In the prototype</th><th>For production</th></tr>
+      <tr><td>Console role set by a demo header</td><td>Single sign-on with multi-factor authentication; role-based access managed centrally</td></tr>
+      <tr><td>SQLite file and a local vault key</td><td>Managed database encrypted at rest and hosted in India; keys in a key management service with rotation; backups</td></tr>
+      <tr><td>Gemini on a free-tier key</td><td>Paid or enterprise tier whose terms exclude training on prompts, under a data processing agreement</td></tr>
+      <tr><td>Registries, DigiLocker, e-Sign and UPI mocked</td><td>Licensed integrations (GSTN, Udyam, DigiLocker, Aadhaar e-Sign, NPCI UPI Autopay)</td></tr>
+      <tr><td>Chats kept indefinitely; open CORS</td><td>Delete unconverted chats (for example after 90 days); strict origins, TLS, rate limits</td></tr>
+      <tr><td>No breach or rights process yet</td><td>Data Protection Officer, grievance desk, breach notice to the Data Protection Board and affected owners, regular security testing</td></tr>
+    </table>
+  </div>
+</section>
+
+<footer>
+  <span>Accel Business is the case's fictional operator. This note describes design choices, not legal advice.</span>
+  <span>github.com/AgileSeagull/AirtelSync</span>
+</footer>
+</body>
+</html>

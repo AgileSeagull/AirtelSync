@@ -32,7 +32,7 @@ async def message(s: AdvisorSession, text: str) -> tuple[str, str]:
     use_llm = llm.available() and not s.llm_disabled
     if use_llm:
         try:
-            reply = _plain(await llm.respond(s, text))
+            reply = _plain(await llm.respond(s, redact_for_llm(text)))
             mode = f"llm:{llm.provider()}"
         except llm.LLMUnavailable as e:
             # A busy or rate-limited model only costs this one turn; a bad key ends LLM use.
@@ -47,6 +47,22 @@ async def message(s: AdvisorSession, text: str) -> tuple[str, str]:
     s.transcript.append(Turn(role="assistant", text=reply, mode=mode))
     s.save()
     return reply, mode
+
+
+_AADHAAR = re.compile(r"(?<!\d)\d{4}[ -]?\d{4}[ -]?\d{4}(?!\d)")
+_PAN = re.compile(r"\b[A-Za-z]{5}\d{4}[A-Za-z]\b")
+_LONG_DIGITS = re.compile(r"(?<!\d)\d{9,18}(?!\d)")  # bank accounts, phone numbers
+_UPI = re.compile(r"\b[\w.\-]{2,}@[a-zA-Z]{2,}\b")
+
+
+def redact_for_llm(text: str) -> str:
+    """Personal identifiers never leave for the LLM provider. GSTIN (a public business
+    registration the advisor needs for lookup) is kept; Aadhaar, PAN, account or phone
+    numbers and UPI IDs are replaced, and the model is told what was removed."""
+    text = _AADHAAR.sub("[Aadhaar-like number removed]", text)
+    text = _PAN.sub("[PAN removed]", text)
+    text = _LONG_DIGITS.sub("[number removed]", text)
+    return _UPI.sub("[UPI ID removed]", text)
 
 
 def _plain(text: str) -> str:

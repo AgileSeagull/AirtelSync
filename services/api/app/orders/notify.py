@@ -42,11 +42,20 @@ def send(order, event: str, lang: str = "en", **kw) -> dict | None:
     name = (order.business or {}).get("trade_name") or (order.business or {}).get("business_type") or "Your business"
     link = f"{os.getenv('UDYAM_PUBLIC_URL', 'http://localhost:8000')}/#/track/{order.id}"
     text = tpl.format(name=name, link=link, **{k: v for k, v in kw.items() if v is not None})
-    msg = {"id": uuid.uuid4().hex[:12], "order_id": order.id, "event": event, "channel": "whatsapp", "text": text,
+    channel = "whatsapp" if whatsapp_opted_in(order) else "in_app"
+    msg = {"id": uuid.uuid4().hex[:12], "order_id": order.id, "event": event, "channel": channel, "text": text,
            "at": store.now(), "seq": time.time_ns(), "delivery": "outbox"}
-    msg["delivery"] = _twilio(text) or "outbox"
+    if channel == "whatsapp":  # only with the owner's optional WhatsApp consent; the tracker always shows it
+        msg["delivery"] = _twilio(text) or "outbox"
     store.put("notifications", msg["id"], msg)
     return msg
+
+
+def whatsapp_opted_in(order) -> bool:
+    """True only if the owner ticked the optional WhatsApp purpose and has not withdrawn consent."""
+    case = store.get("kyc_cases", order.kyc_case_id) if order.kyc_case_id else None
+    c = store.get("consents", case.get("consent_id")) if case and case.get("consent_id") else None
+    return bool(c and not c.get("withdrawn_at") and "service_updates_whatsapp" in c.get("purposes", []))
 
 
 def for_order(order_id: str) -> list[dict]:

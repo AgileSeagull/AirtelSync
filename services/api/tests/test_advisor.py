@@ -365,3 +365,14 @@ def test_slow_llm_turn_times_out_to_scripted(fake_llm, monkeypatch):
     assert mode == "scripted" and not s.llm_disabled
     # only the completed (scripted) exchange is in the LLM history
     assert [m["role"] for m in s.llm_messages] == ["user", "assistant"]
+
+
+def test_personal_ids_are_removed_before_the_llm(fake_llm):
+    script, sent = fake_llm
+    script += [text("Please don't share those here.")]
+    s = service.start("en")
+    asyncio.run(service.message(s, "GSTIN 27AAPFU0939F1ZV, my aadhaar 1234 5678 9012, PAN ABCDE1234F, a/c 123456789012345, upi ravi@okbank"))
+    sent_text = json.dumps(sent[-1])
+    assert "27AAPFU0939F1ZV" in sent_text  # business registration kept for lookup
+    for secret in ("1234 5678 9012", "ABCDE1234F", "123456789012345", "ravi@okbank"):
+        assert secret not in sent_text
