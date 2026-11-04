@@ -133,6 +133,37 @@ export const kyc = {
   esign: (id: string, otp: string) => call<KycCase>(`/kyc/cases/${id}/esign`, { method: "POST", body: JSON.stringify({ otp }) }),
 };
 
+// ------------------------------------------------------------------ tracking
+export interface TrackStep { state: string; label: string; status: "done" | "current" | "upcoming"; at: string | null }
+export interface TrackLine { product_id: string; name: string; qty: number; install_days: number; state: string; eta: string | null }
+export interface Track {
+  order_id: string; state: string; label: string; steps: TrackStep[]; lines: TrackLine[]; eta: string | null;
+  promised_by: string | null; install_slot: string | null; sla_breach: boolean; rerouted: boolean;
+  mandate: { upi_id_masked: string; max_amount: number } | null;
+  quote: { monthly_total: number; setup_total: number; earliest_activation_days: number }; contract: string;
+  business: { trade_name?: string; business_type?: string; city?: string };
+  events: { at: string; state: string; note: string | null }[];
+  notifications: { id: string; event: string; text: string; at: string; delivery: string }[];
+  owner_action: { type: "kyc" | "mandate"; amount?: number; kyc_case_id?: string | null } | null;
+  activated_at: string | null; lang: Lang;
+}
+
+export const orders = {
+  track: (oid: string) => call<Track>(`/orders/${oid}/track`),
+  mandate: (oid: string, upi_id: string) => call<Track>(`/orders/${oid}/mandate`, { method: "POST", body: JSON.stringify({ upi_id }) }),
+  advance: (oid: string, fibre_feasible = true) =>
+    call<Track>(`/orders/${oid}/advance`, { method: "POST", body: JSON.stringify({ fibre_feasible }) }),
+  delay: (oid: string) => call<Track>(`/orders/${oid}/delay`, { method: "POST" }),
+};
+
+export function fmtDate(iso: string | null, lang: Lang, withTime = false): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const opts: Intl.DateTimeFormatOptions = { weekday: "short", day: "numeric", month: "short" };
+  if (withTime) Object.assign(opts, { hour: "numeric", minute: "2-digit" });
+  return d.toLocaleString(lang === "hi" ? "hi-IN" : "en-IN", opts);
+}
+
 // Indian digit grouping: 1,23,456
 export function inr(n: number): string {
   return "₹" + Math.round(n).toLocaleString("en-IN");

@@ -31,7 +31,14 @@ class Order(BaseModel):
     state: str = "QuoteAccepted"
     events: list[OrderEvent] = Field(default_factory=list)
     kyc_case_id: str | None = None
-    lines: list[dict[str, Any]] = Field(default_factory=list)  # per-product fulfilment (phase 5)
+    lines: list[dict[str, Any]] = Field(default_factory=list)  # per-product fulfilment
+    mandate: dict[str, Any] | None = None
+    eta: str | None = None
+    promised_by: str | None = None
+    install_slot: str | None = None
+    sla_breach: bool = False
+    rerouted: bool = False
+    activated_at: str | None = None
 
     def save(self) -> None:
         store.put("orders", self.id, self.model_dump())

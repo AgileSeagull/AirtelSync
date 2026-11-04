@@ -4,6 +4,7 @@ import { Chat } from "./components/Chat";
 import { Kyc } from "./components/Kyc";
 import { OrderPlaced } from "./components/OrderPlaced";
 import { QuoteBuilder } from "./components/QuoteBuilder";
+import { Tracker } from "./components/Tracker";
 import { Welcome } from "./components/Welcome";
 import { t } from "./i18n";
 
@@ -90,7 +91,8 @@ export default function App() {
     title = tr("kycTitle");
     body = <Kyc key={route.oid || "demo"} orderId={route.oid} lang={session?.lang || lang} tr={tr} onTrack={(oid) => go(`/track/${oid}`)} />;
   } else if (route.name === "track") {
-    body = <main className="done"><h2>{tr("trackOrder")}</h2><p className="ref">{route.oid}</p></main>;
+    title = tr("trackTitle");
+    body = <Tracker key={route.oid} orderId={route.oid} lang={activeLang} tr={tr} onKyc={() => go(`/kyc/${route.oid}`)} />;
   }
 
   return (

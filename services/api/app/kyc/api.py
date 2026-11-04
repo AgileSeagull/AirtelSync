@@ -186,4 +186,6 @@ def esign(cid: str, req: OtpReq) -> dict:
             o.state = "KYCVerified"
             o.events.append(OrderEvent(state="KYCVerified", note="Business verified and e-signed online"))
             o.save()
+            from ..orders import notify
+            notify.send(o, "KYCVerified", c.lang)
     return view(c)

@@ -65,6 +65,18 @@ cd services/api && .venv/bin/python -m evals.run_kyc_evals -v    # 12/12 specime
 | K11 | needs_action | electricity bill dated 31 Oct 2025, older than 90 days |
 | K03, K06, K08, K09, K10, K12 | approved | clean (GSTIN OCR errors corrected) |
 
+## Order tracker
+
+`QuoteAccepted → KYCVerified → MandateSet (UPI AutoPay, mock) → InstallScheduled → Installed → Activated`, with
+per-product ETAs from `typical_install_days` (products install in parallel), a promised date, SLA-breach flag and
+proactive escalation on delay. If fibre is not feasible, fibre lines are rerouted to 5G AirFiber (P04) before the
+owner waits, the quote is recalculated, and add-ons that need fibre are removed with an explanation. Every state
+change sends an owner message (en/hi) to an outbox shown on the tracker; set `TWILIO_ACCOUNT_SID`,
+`TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM` and `UDYAM_DEMO_WHATSAPP_TO` to also send them via the Twilio WhatsApp
+sandbox (adapter not tested without credentials). The tracker polls every 5 s; a "Demo controls" panel simulates
+the back office (next step, fibre not available, install delay). Activated orders show a referral card
+(referrals convert at 14.8%, the best channel in the data).
+
 ## Run everything
 
 ```bash
@@ -101,7 +113,7 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 | 2 | GenAI advisor: tool-calling loop, multilingual, output guard, eval harness | done |
 | 3 | Owner web app: chat, quote & checkout with toggles | done |
 | 4 | Smart KYC: consent, OCR, layered checks, verdicts | done |
-| 5 | Order tracker: state machine, ETAs, notifications | |
+| 5 | Order tracker: state machine, ETAs, notifications | done |
 | 6 | Back office: lead console, propensity score | |
 
 ## Key engine facts (tested)
