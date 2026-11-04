@@ -1,0 +1,161 @@
+# Advisor evaluation scenarios. Each scenario is a conversation plus assertions on the
+# bundle the advisor ends up recommending (checked against engine output, not text).
+#   expect.segment                  inferred segment
+#   expect.tier                     which tier to check (default: recommended)
+#   expect.include / exclude        product ids in / not in that tier
+#   expect.first                    the primary connectivity product
+#   expect.qty                      {product_id: quantity}
+#   expect.excluded                 products reported as not available (with a rule)
+#   expect.note                     substring expected in the engine notes
+#   expect.handoff                  conversation should end in a human handoff
+#   expect.no_gst_products          no product that needs GST registration in any tier
+- id: dental-clinic-kochi
+  lang: en
+  messages: ["Hi, I run a dental clinic in Kochi", "12 staff, one clinic", "We need CCTV and business email. Home broadband now, about Rs 3000 a month", "32TTNXB7384T1ZW"]
+  expect: {segment: prof, first: P02, include: [P16, P23], qty: {P16: 7}}
+
+- id: kirana-no-gst-hindi
+  lang: hi
+  messages: ["मेरी किराना दुकान है पटना में", "2 लोग", "बिलिंग और व्हाट्सएप चाहिए, अभी हॉटस्पॉट है, ₹800 महीना", "नहीं"]
+  expect: {segment: micro, first: P01, include: [P19, P07], excluded: [P15], no_gst_products: true, note: "Register for GST"}
+
+- id: cancelled-gstin-travel
+  lang: en
+  messages: ["37IHKXV5167L1ZS", "travel agency, 6 people", "whatsapp and sms for customers"]
+  expect: {segment: prof, no_gst_products: true, note: cancelled}
+
+- id: suspended-gstin-pharmacy
+  lang: en
+  messages: ["My GSTIN is 32WAHXG8645K1ZH", "pharmacy, 4 people", "UPI billing and whatsapp"]
+  expect: {segment: micro, no_gst_products: true, include: [P19], note: suspended}
+
+- id: textile-unit-large
+  lang: en
+  messages: ["Textile unit in Surat", "80 workers", "machine monitoring for our looms", "yes 24ABCXE1234F1Z5"]
+  expect: {segment: mfg}
+  allow_gstin_error: true
+
+- id: textile-unit-active-gst
+  lang: en
+  messages: ["03JEUXR9399M1ZI", "auto-parts unit, 42 staff", "machine monitoring and CCTV"]
+  expect: {segment: mfg, first: P05, include: [P24, P23]}
+
+- id: small-unit-wants-leased-line
+  lang: en
+  messages: ["We are a small packaging unit in Surat", "8 people", "we want a leased line with SLA", "no"]
+  expect: {segment: mfg, first: P02, exclude: [P05, P06], note: "leased line is not possible"}
+
+- id: restaurant-chain-pune
+  lang: en
+  messages: ["Restaurant chain in Pune", "60 staff across 6 outlets", "billing at every outlet and backup internet", "no GST yet"]
+  expect: {segment: multi, first: P02, qty: {P02: 6, P19: 6}, include: [P09]}
+
+- id: tier2-no-1g
+  lang: en
+  messages: ["Diagnostic lab in Nagpur", "20 staff", "very fast internet for large files", "no"]
+  expect: {segment: prof, exclude: [P03]}
+
+- id: tier1-gets-1g
+  lang: en
+  messages: ["Diagnostic lab in Mumbai", "20 staff", "very fast internet for large files", "32TTNXB7384T1ZW"]
+  expect: {segment: prof, first: P03}
+
+- id: fibre-not-feasible-salon
+  lang: en
+  messages: ["salon in Indore", "3 people", "fibre is not available in our market, need CCTV", "no"]
+  expect: {segment: micro, first: P04, include: [P23]}
+
+- id: mobile-only-boutique
+  lang: en
+  messages: ["boutique in Jaipur", "2 people", "only want business sim cards", "no"]
+  expect: {segment: micro, tier: essential, include: [P07], exclude: [P01, P02, P04]}
+
+- id: pharmacy-chain-delhi
+  lang: en
+  messages: ["Pharmacy chain in Delhi", "50 staff, 7 stores", "billing and cctv", "no"]
+  expect: {segment: multi, first: P02, qty: {P02: 7, P23: 14}}
+
+- id: large-auto-parts-unit
+  lang: en
+  messages: ["03JEUXR9399M1ZI", "auto-parts unit", "120 workers", "nothing else"]
+  expect: {segment: mfg, first: P06}
+
+- id: ca-firm-bangalore-alias
+  lang: en
+  messages: ["CA firm in Bangalore", "15 staff", "business email and backup of our PCs", "29KBXXN3993R1ZC"]
+  expect: {segment: prof, include: [P16, P17], exclude: [P03], note: cancelled}
+
+- id: coaching-tollfree-no-gst
+  lang: en
+  messages: ["coaching centre in Lucknow", "10 staff", "a toll free number for parents", "no"]
+  expect: {segment: prof, excluded: [P13], no_gst_products: true}
+
+- id: bakery-hindi-cctv
+  lang: hi
+  messages: ["मेरी बेकरी है मुंबई में", "4 लोग", "CCTV कैमरा चाहिए", "नहीं"]
+  expect: {segment: micro, first: P01, include: [P23]}
+
+- id: gym-chain-no-gst-sdwan
+  lang: en
+  messages: ["Gym chain in Hyderabad", "30 staff and 3 branches", "central management of internet across all branches, sd-wan", "no"]
+  expect: {segment: multi, excluded: [P10], exclude: [P10]}
+
+- id: hardware-cameras
+  lang: en
+  messages: ["hardware store in Lucknow", "4 people", "cctv", "no"]
+  expect: {segment: micro, include: [P23]}
+
+- id: printing-press-machines
+  lang: en
+  messages: ["Printing press in Ahmedabad", "12 workers", "machine monitoring", "03JEUXR9399M1ZI"]
+  expect: {segment: mfg, first: P05, include: [P24]}
+
+- id: hotel-group-wifi
+  lang: en
+  messages: ["Budget hotel group in Chennai", "40 staff, 4 sites", "guest wifi for customers", "no"]
+  expect: {segment: multi, qty: {P22: 4, P02: 4}}
+
+- id: real-estate-whatsapp-gst
+  lang: en
+  messages: ["Real estate agency in Kolkata", "3 people", "whatsapp for customers", "32TTNXB7384T1ZW"]
+  expect: {segment: prof, include: [P15]}
+
+- id: food-processing-fleet
+  lang: en
+  messages: ["Food processing unit in Coimbatore", "30 workers", "gps tracking for our delivery vehicles", "03JEUXR9399M1ZI"]
+  expect: {segment: mfg, include: [P25]}
+
+- id: unknown-city-defaults-tier2
+  lang: en
+  messages: ["Law office", "Shimla", "16 people", "high speed internet", "32TTNXB7384T1ZW"]
+  expect: {segment: prof, exclude: [P03]}
+
+- id: handoff-request
+  lang: en
+  messages: ["I have a factory, can I talk to someone?"]
+  expect: {handoff: true}
+
+- id: invalid-gstin-recovers
+  lang: en
+  messages: ["My GSTIN is 32TTNXB7384T1ZX", "no", "Optician in Vadodara", "2 people", "billing"]
+  expect: {segment: micro, include: [P19]}
+
+- id: hotspot-pharmacy-patna
+  lang: en
+  messages: ["Pharmacy in Patna", "3 people", "UPI billing. using mobile hotspot, Rs 600 per month", "no"]
+  expect: {segment: micro, first: P01, include: [P19]}
+
+- id: law-office-telephony
+  lang: en
+  messages: ["Law office in Delhi", "25 staff", "office phone lines with IVR and call recording", "32TTNXB7384T1ZW"]
+  expect: {segment: prof, include: [P12]}
+
+- id: micro-firewall-blocked
+  lang: en
+  messages: ["kirana store in Pune", "3 people", "a firewall", "no"]
+  expect: {segment: micro, excluded: [P21], exclude: [P21]}
+
+- id: sweet-shop-website
+  lang: en
+  messages: ["Sweet shop in Surat", "5 people", "a website and whatsapp", "no"]
+  expect: {segment: micro, include: [P18], excluded: [P15]}

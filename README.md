@@ -17,6 +17,21 @@ services/api/         FastAPI backend
   tests/              pytest suite
 ```
 
+## Advisor modes
+
+- **LLM mode** (Claude, `claude-opus-5-5` at low effort): set `ANTHROPIC_API_KEY` (see `services/api/.env.example`).
+  The model talks; tools (`lookup_gstin`, `update_profile`, `recommend_bundle`, `check_product`, `handoff_to_human`)
+  call the engine. An output guard rejects any rupee amount or product id not returned by a tool. Server-side
+  refusal fallback is enabled (`fallbacks: "default"`).
+- **Scripted mode** (no key needed): rule-based English/Hindi/Hinglish slot filling over the same tools. Also the
+  automatic fallback if the LLM errors mid-session, so a live demo never dead-ends.
+
+```bash
+cd services/api
+.venv/bin/python -m evals.run_advisor_evals          # 30 scenarios, scripted
+.venv/bin/python -m evals.run_advisor_evals --llm    # same scenarios through Claude
+```
+
 ## Run the API
 
 ```bash
@@ -31,7 +46,7 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 | Phase | Scope | Status |
 |---|---|---|
 | 1 | Core engine: catalogue, eligibility, dependencies, pricing, recommendation, mock GSTIN/Udyam APIs | done |
-| 2 | GenAI advisor: tool-calling loop, multilingual, output guard, eval harness | |
+| 2 | GenAI advisor: tool-calling loop, multilingual, output guard, eval harness | done |
 | 3 | Owner web app: chat, quote & checkout with toggles | |
 | 4 | Smart KYC: consent, OCR, layered checks, verdicts | |
 | 5 | Order tracker: state machine, ETAs, notifications | |
