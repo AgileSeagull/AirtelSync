@@ -2,364 +2,197 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>AirtelSync — Solution Architecture</title>
+<title>AirtelSync — Solution architecture</title>
 <style>
   @page { size: 420mm 297mm; margin: 0; }
   :root {
-    --ink: #10272a; --muted: #5a6b6a; --line: #d6e1df; --paper: #f4f8f7; --surface: #fff;
-    --teal: #0b5d5b; --teal-deep: #0b3b3c; --teal-soft: #e1efed; --saffron: #f2a93b; --saffron-soft: #fdf0dc;
-    --f1: #0e8a74; --f2: #2f6fde; --f3: #7a45d6; --f4: #d9822b; --f5: #d43d7a; --data: #8a9a98;
+    --ink: #0f2324; --body: #3d4f50; --muted: #7b8a89; --hair: #dfe6e5; --panel: #f4f7f6;
+    --accent: #0b5d5b; --line: #aab6b4;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; }
   body {
-    width: 1587px; height: 1123px; overflow: hidden; background: var(--paper); color: var(--ink);
-    font: 400 10.5px/1.32 "Noto Sans", "Segoe UI", sans-serif;
+    width: 1587px; height: 1123px; overflow: hidden; background: #fff; color: var(--ink);
+    font: 400 12.5px/1.45 "Noto Sans", sans-serif; padding: 56px 60px 40px; position: relative;
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
-    padding: 20px 30px 16px; display: flex; flex-direction: column; gap: 10px;
   }
-  h1, h2, h3, .lane, .badge, .chip, .flowkey h3 { font-family: Montserrat, "Noto Sans", sans-serif; }
 
-  /* header */
-  header { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; }
-  header h1 { margin: 0; font-size: 25px; font-weight: 800; letter-spacing: -0.3px; color: var(--teal-deep); }
-  header h1 span { color: var(--saffron); }
-  header p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
-  .legend { display: flex; gap: 16px; align-items: center; font-size: 10px; color: var(--muted); flex-wrap: wrap; justify-content: flex-end; max-width: 780px; }
-  .legend .k { display: inline-flex; align-items: center; gap: 6px; }
-  .legend .sw { width: 26px; height: 0; border-top: 2.5px solid; }
-  .legend .sw.dash { border-top-style: dashed; border-color: var(--data); }
-  .legend .bx { width: 22px; height: 13px; border: 1.5px dashed #9aa9a7; border-radius: 3px; background: #fbfcfc; }
-  .legend .dots { display: inline-flex; gap: 3px; }
-  .legend .dots i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; }
+  h1 { margin: 0; font: 700 28px/1.1 Montserrat, sans-serif; letter-spacing: -0.4px; }
+  h1 span { color: var(--muted); font-weight: 500; }
+  .subtitle { margin: 8px 0 0; color: var(--muted); font-size: 13px; }
+  .legend { display: flex; gap: 26px; color: var(--muted); font-size: 11px; align-items: center; }
+  .legend i { display: inline-block; vertical-align: middle; margin-right: 8px; }
+  .legend .ln { width: 28px; border-top: 1.5px solid var(--line); }
+  .legend .ln.acc { border-color: var(--accent); border-top-width: 2px; }
+  .legend .mk { width: 22px; height: 14px; border: 1.25px dashed var(--line); border-radius: 4px; }
 
-  /* main grid */
-  .grid {
-    display: grid; column-gap: 0; row-gap: 17px;
-    grid-template-columns: 160px 40px 200px 112px 1fr 112px 330px;
-    grid-template-rows: 24px repeat(6, auto);
-  }
-  .lane { font-size: 10.5px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase; color: var(--teal); align-self: end; border-bottom: 2px solid var(--teal); padding-bottom: 3px; }
-  .lane small { font-family: "Noto Sans", sans-serif; text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--muted); font-size: 10px; margin-left: 6px; }
+  .wrap { position: relative; }
+  .grid { display: grid; grid-template-columns: 112px repeat(6, 1fr); column-gap: 46px; row-gap: 50px; position: relative; z-index: 1; }
+  .layer { align-self: center; font: 600 11px Montserrat, sans-serif; letter-spacing: 1.4px; text-transform: uppercase; color: var(--ink); }
+  .layer small { display: block; margin-top: 4px; font: 400 11px "Noto Sans", sans-serif; letter-spacing: 0; text-transform: none; color: var(--muted); }
 
-  .box { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 7px 10px; position: relative; box-shadow: 0 1px 2px rgba(16,39,42,.05); }
-  .box h3 { margin: 0 0 3px; font-size: 12.5px; font-weight: 700; color: var(--teal-deep); display: flex; align-items: center; gap: 7px; }
-  .box h3 code { font: 500 9.5px "JetBrains Mono", monospace; color: var(--muted); background: var(--paper); padding: 1px 5px; border-radius: 4px; }
-  .box p { margin: 0; color: #334b4c; }
-  .box p + p { margin-top: 3px; }
-  .box .sub { color: var(--muted); font-size: 10px; }
-  .box.actor { background: var(--teal-deep); color: #fff; border: 0; display: flex; flex-direction: column; justify-content: center; }
-  .box.actor h3 { color: #fff; font-size: 13.5px; }
-  .box.actor p { color: #cfe3e0; }
-  .box.screen { border-left: 4px solid var(--teal); }
-  .box.ext { border: 1.5px dashed #9aa9a7; background: #fbfcfc; }
-  .box.ext.live { border-style: solid; border-color: #b9cbc8; background: #fff; }
-  .box.ext h3 .tag { font: 600 8.5px Montserrat, sans-serif; letter-spacing: .6px; text-transform: uppercase; background: var(--saffron-soft); color: #8a4b00; padding: 1px 5px; border-radius: 3px; }
-  .box.ext h3 .tag.live { background: var(--teal-soft); color: var(--teal); }
-  .ext-list { margin: 4px 0 0; padding: 0; list-style: none; display: grid; gap: 4px; }
-  .ext-list li { padding: 4px 7px; background: var(--paper); border-radius: 6px; }
-  .ext-list b { font-weight: 600; color: var(--teal-deep); }
+  .stage { border-top: 2px solid var(--ink); padding-top: 9px; }
+  .stage .n { font: 600 11px Montserrat, sans-serif; color: var(--accent); letter-spacing: .5px; }
+  .stage h2 { margin: 3px 0 0; font: 700 18px Montserrat, sans-serif; }
+  .stage p { margin: 3px 0 0; color: var(--muted); font-size: 12.5px; }
 
-  .svc { display: grid; grid-template-columns: 132px 1fr; gap: 8px; align-items: start; border-left: 4px solid; }
-  .svc .head h3 { font-size: 13px; }
-  .svc .head .sub { display: block; }
-  .chips { display: flex; flex-wrap: wrap; align-items: center; gap: 3px; margin-bottom: 3px; }
-  .chip { font-size: 9.3px; font-weight: 600; padding: 2px 6px; border-radius: 12px; background: var(--paper); color: var(--teal-deep); border: 1px solid var(--line); white-space: nowrap; }
-  .chips .to { color: #9aa9a7; font-size: 10px; }
-  .chip.hl { background: var(--saffron-soft); border-color: #f1d3a3; color: #8a4b00; }
-  .f1 { --c: var(--f1); } .f2 { --c: var(--f2); } .f3 { --c: var(--f3); } .f4 { --c: var(--f4); } .f5 { --c: var(--f5); }
-  .svc.f1, .svc.f2, .svc.f3, .svc.f4, .svc.f5 { border-left-color: var(--c); }
-  .svc .num { display: inline-grid; place-items: center; width: 17px; height: 17px; border-radius: 50%; background: var(--c); color: #fff; font: 700 10px Montserrat, sans-serif; flex: none; }
+  .card { background: #fff; border: 1px solid var(--hair); border-radius: 12px; padding: 15px 17px 16px; }
+  .card h3 { margin: 0; font: 600 15px Montserrat, sans-serif; }
+  .card p { margin: 5px 0 0; color: var(--body); font-size: 12.5px; }
+  .card .tag { display: block; margin-bottom: 4px; font: 600 9.5px Montserrat, sans-serif; letter-spacing: 1.2px; color: var(--muted); }
+  .card .tag.live { color: var(--accent); }
+  .card.mock { border-style: dashed; border-color: #c3ccca; }
+  .card.actor { background: var(--ink); border-color: var(--ink); color: #fff; display: flex; align-items: baseline; gap: 14px; padding: 15px 20px; }
+  .card.actor.stack { flex-direction: column; gap: 2px; }
+  .card.actor h3 { color: #fff; }
+  .card.actor p { color: #a9bdbb; margin: 0; }
+  .panel.data { background: none; border: 1px solid var(--hair); }
+  .card.core { border-color: #cfdcda; }
 
-  /* horizontal arrows */
-  .arr { position: relative; display: flex; flex-direction: column; justify-content: center; align-items: stretch; padding: 0 6px; color: var(--c); }
-  .arr .lbl { font: 500 9px/1.25 "JetBrains Mono", monospace; color: var(--muted); text-align: center; margin-bottom: 5px; }
-  .arr .lbl.below { margin: 5px 0 0; order: 3; }
-  .shaft { position: relative; height: 2.5px; background: currentColor; margin: 0 2px; }
-  .shaft::after { content: ""; position: absolute; right: -3px; top: -4.5px; border-left: 9px solid currentColor; border-top: 5.75px solid transparent; border-bottom: 5.75px solid transparent; }
-  .both .shaft::before { content: ""; position: absolute; left: -3px; top: -4.5px; border-right: 9px solid currentColor; border-top: 5.75px solid transparent; border-bottom: 5.75px solid transparent; }
-  .badge { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 18px; height: 18px; border-radius: 50%; background: var(--c); color: #fff; font-size: 10px; font-weight: 700; display: grid; place-items: center; box-shadow: 0 0 0 3px var(--paper); }
-  .arr.haslbl .badge { display: none; }
-  .arr.multi { gap: 0; justify-content: space-around; padding-top: 6px; padding-bottom: 6px; }
+  .panel { background: var(--panel); border-radius: 18px; margin: -16px -20px; z-index: -1; }
 
-  /* vertical connectors inside the services lane */
-  .v { position: absolute; left: 70px; top: -16px; height: 16px; width: 2.5px; background: var(--c); }
-  .v::after { content: ""; position: absolute; bottom: -2px; left: -4.5px; border-top: 8px solid var(--c); border-left: 5.75px solid transparent; border-right: 5.75px solid transparent; }
-  .v.both::before { content: ""; position: absolute; top: -2px; left: -4.5px; border-bottom: 8px solid var(--c); border-left: 5.75px solid transparent; border-right: 5.75px solid transparent; }
-  .v span { position: absolute; left: 10px; top: 1px; white-space: nowrap; font: 500 9px "JetBrains Mono", monospace; color: var(--muted); }
+  .trust { display: flex; align-items: center; border-top: 1px solid var(--hair); padding-top: 16px; }
+  .trust div { flex: 1; padding: 0 18px; border-left: 1px solid var(--hair); color: var(--body); font-size: 12.5px; }
+  .trust div:first-child { border-left: 0; padding-left: 0; }
+  .trust b { display: block; color: var(--ink); font: 600 13px Montserrat, sans-serif; margin-bottom: 3px; }
 
-  /* data layer */
-  .data { display: grid; grid-template-columns: 214px 1fr 1fr 1fr; gap: 12px; position: relative; margin-left: 214px; }
-  .data .lane { grid-column: 1 / -1; }
-  .data .title { display: flex; flex-direction: column; justify-content: center; padding-right: 8px; }
-  .data .title h2 { margin: 0; font-size: 13px; color: var(--teal-deep); }
-  .data .title p { margin: 2px 0 0; color: var(--muted); font-size: 10px; }
-  .box.store { border-top: 3px solid var(--data); }
-  .mono { font: 500 9.5px/1.5 "JetBrains Mono", monospace; color: var(--teal-deep); }
-  .rw { position: absolute; top: -18px; height: 16px; border-left: 2px dashed var(--data); }
-  .rwl { position: absolute; left: 8px; top: 1px; white-space: nowrap; font: 500 9px "JetBrains Mono", monospace; color: var(--muted); }
-  .rw::after { content: ""; position: absolute; bottom: -2px; left: -5px; border-top: 7px solid var(--data); border-left: 4px solid transparent; border-right: 4px solid transparent; }
+  footer { position: absolute; left: 60px; right: 60px; bottom: 28px; display: flex; justify-content: space-between; color: var(--muted); font-size: 10.5px; }
 
-  /* trust strip */
-  .trust { display: flex; align-items: center; gap: 14px; background: var(--teal-deep); color: #e5f1ef; border-radius: 10px; padding: 6px 14px; font-size: 10.5px; }
-  .trust h3 { margin: 0; font-size: 11px; color: var(--saffron); white-space: nowrap; letter-spacing: .6px; text-transform: uppercase; }
-  .trust ul { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 4px 16px; }
-  .trust li::before { content: "●"; color: var(--saffron); margin-right: 5px; font-size: 8px; vertical-align: 1px; }
-
-  /* flow key */
-  .flowkey { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
-  .flowkey section { background: var(--surface); border-radius: 10px; border: 1px solid var(--line); border-top: 4px solid var(--c); padding: 6px 10px 7px; }
-  .flowkey h3 { margin: 0 0 4px; font-size: 12px; display: flex; align-items: center; gap: 7px; color: var(--teal-deep); }
-  .flowkey ol { margin: 0; padding-left: 15px; color: #334b4c; font-size: 10px; }
-  .flowkey li { margin: 1px 0; }
-  .flowkey li::marker { color: var(--c); font-weight: 700; }
-  footer { display: flex; justify-content: space-between; color: var(--muted); font-size: 9.5px; margin-top: -4px; }
+  svg#wires { position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: visible; }
+  svg#wires text { font: 500 10px "Noto Sans", sans-serif; fill: var(--muted); }
 </style>
 </head>
 <body>
 
 <header>
   <div>
-    <h1>AirtelSync <span>·</span> Solution Architecture</h1>
-    <p>Project Udyam Digital · Accel Business · digital-first MSME discovery, bundling, KYC and activation · YTL Hackathon 2026, Track A</p>
+    <h1>AirtelSync <span>· Solution architecture</span></h1>
+    <p class="subtitle">Project Udyam Digital for Accel Business — an MSME owner goes from first question to an active connection without a sales visit.</p>
   </div>
   <div class="legend">
-    <span class="k"><span class="dots"><i style="background:var(--f1)"></i><i style="background:var(--f2)"></i><i style="background:var(--f3)"></i><i style="background:var(--f4)"></i><i style="background:var(--f5)"></i></span>Numbered data flows ① – ⑤ (key below)</span>
-    <span class="k"><span class="sw" style="border-color:var(--teal)"></span>Request / response</span>
-    <span class="k"><span class="sw dash"></span>Read / write to data layer</span>
-    <span class="k"><span class="bx"></span>Mocked in prototype, real-API shaped</span>
+    <span><i class="ln"></i>Request</span>
+    <span><i class="ln acc"></i>Journey hand-off</span>
+    <span><i class="mk"></i>Mocked for the prototype</span>
   </div>
 </header>
 
+<div class="wrap" id="wrap">
 <div class="grid">
-  <!-- lane headers -->
-  <div class="lane" style="grid-column:1">Users &amp; channels</div>
-  <div class="lane" style="grid-column:3">Web app<small>React PWA</small></div>
-  <div class="lane" style="grid-column:5">Application services<small>FastAPI (Python) · one process · routes under /api</small></div>
-  <div class="lane" style="grid-column:7">External services &amp; AI</div>
 
-  <!-- ===== column 1: actors ===== -->
-  <div class="box actor" style="grid-column:1; grid-row:2 / 7">
-    <h3>MSME owner</h3>
-    <p>Shop, clinic, office, small chain or factory owner on a mobile phone.</p>
-    <p style="margin-top:8px">Types or speaks in English, Hindi, Hinglish or another Indian language; the app follows their language every turn.</p>
-    <p style="margin-top:8px">Installs nothing: opens a web link (installable PWA).</p>
-    <p style="margin-top:8px">Gets status updates in-app and on WhatsApp.</p>
-  </div>
-  <div class="box actor" style="grid-column:1; grid-row:7; background:#25494a">
-    <h3>Accel staff &amp; partners</h3>
-    <p>Sales and KYC reviewers; partner and field agents in assisted mode.</p>
-  </div>
+  <!-- journey stages -->
+  <div></div>
+  <div class="stage" style="grid-row:1; grid-column:2 / 4"><div class="n">01</div><h2>Discover</h2><p>AI advisor finds the right bundle</p></div>
+  <div class="stage" style="grid-row:1; grid-column:4"><div class="n">02</div><h2>Quote</h2><p>Price, adjust, accept</p></div>
+  <div class="stage" style="grid-row:1; grid-column:5"><div class="n">03</div><h2>Verify</h2><p>Paperless KYC</p></div>
+  <div class="stage" style="grid-row:1; grid-column:6"><div class="n">04</div><h2>Activate</h2><p>Install and go live</p></div>
+  <div class="stage" style="grid-row:1; grid-column:7"><div class="n">05</div><h2>Operate</h2><p>Score, route, review</p></div>
 
-  <!-- arrows col 2 (actor → screen) -->
-  <div class="arr f1" style="grid-column:2; grid-row:2"><div class="shaft"></div><span class="badge">1</span></div>
-  <div class="arr f2" style="grid-column:2; grid-row:3 / 5"><div class="shaft"></div><span class="badge">2</span></div>
-  <div class="arr f3" style="grid-column:2; grid-row:5"><div class="shaft"></div><span class="badge">3</span></div>
-  <div class="arr f4" style="grid-column:2; grid-row:6"><div class="shaft"></div><span class="badge">4</span></div>
-  <div class="arr f5" style="grid-column:2; grid-row:7"><div class="shaft"></div><span class="badge">5</span></div>
+  <!-- users -->
+  <div class="layer" style="grid-row:2">Users</div>
+  <div class="card actor" id="owner" style="grid-row:2; grid-column:2 / 7"><h3>MSME owner</h3><p>Mobile browser · any Indian language · text or voice</p></div>
+  <div class="card actor stack" id="staff" style="grid-row:2; grid-column:7"><h3>Accel staff</h3><p>and partners</p></div>
 
-  <!-- ===== column 3: screens ===== -->
-  <div class="box screen" style="grid-column:3; grid-row:2">
-    <h3>Advisor chat</h3>
-    <p>Text or voice, EN / हिंदी. ~5 questions; an optional GSTIN prefills details.</p>
-  </div>
-  <div class="box screen" style="grid-column:3; grid-row:3 / 5">
-    <h3>Bundle cards &amp; quote builder</h3>
-    <p>Essential / Recommended / Complete tiers with reasons. Toggle items, pick the term, see price incl. GST, accept.</p>
-  </div>
-  <div class="box screen" style="grid-column:3; grid-row:5">
-    <h3>Smart KYC</h3>
-    <p>Consent, camera upload or DigiLocker, instant fix-it feedback, e-sign.</p>
-  </div>
-  <div class="box screen" style="grid-column:3; grid-row:6">
-    <h3>Order tracker</h3>
-    <p>Live timeline to activation; delays and reroutes in plain words.</p>
-  </div>
-  <div class="box screen" style="grid-column:3; grid-row:7">
-    <h3>Ops console</h3>
-    <p>Lead scores &amp; routing, re-engage list, KYC review queue, assisted mode.</p>
-  </div>
+  <!-- web app -->
+  <div class="layer" style="grid-row:3">Web app<small>React PWA</small></div>
+  <div class="card" id="w-chat" style="grid-row:3; grid-column:2"><h3>Advisor chat</h3><p>Guided conversation in English or Hindi</p></div>
+  <div class="card" id="w-quote" style="grid-row:3; grid-column:3 / 5"><h3>Bundles &amp; quote</h3><p>Three tiers to compare, edit and accept, priced with GST</p></div>
+  <div class="card" id="w-kyc" style="grid-row:3; grid-column:5"><h3>Documents</h3><p>Consent, camera or DigiLocker, e-sign</p></div>
+  <div class="card" id="w-track" style="grid-row:3; grid-column:6"><h3>Order tracker</h3><p>Live status to activation</p></div>
+  <div class="card" id="w-console" style="grid-row:3; grid-column:7"><h3>Ops console</h3><p>Leads, routing, review queue</p></div>
 
-  <!-- arrows col 4 (screen ↔ API) -->
-  <div class="arr f1 both haslbl" style="grid-column:4; grid-row:2"><span class="lbl">POST /advisor/<br>sessions/{id}/<br>messages</span><div class="shaft"></div></div>
-  <div class="arr f2 both haslbl multi" style="grid-column:4; grid-row:3 / 5">
-    <span class="lbl">tiers + reasons</span><div class="shaft"></div>
-    <span class="lbl" style="margin-top:22px">POST /checkout/{sid}/<br>quote · accept</span><div class="shaft"></div>
-  </div>
-  <div class="arr f3 both haslbl" style="grid-column:4; grid-row:5"><span class="lbl">POST /kyc/cases/{id}/<br>consent · documents ·<br>verify · esign</span><div class="shaft"></div></div>
-  <div class="arr f4 both haslbl" style="grid-column:4; grid-row:6"><span class="lbl">GET /orders/{id}/track<br>POST mandate</span><div class="shaft"></div></div>
-  <div class="arr f5 both haslbl" style="grid-column:4; grid-row:7"><span class="lbl">GET /console/leads ·<br>reengage · kyc-reviews</span><div class="shaft"></div></div>
+  <!-- services -->
+  <div class="layer" style="grid-row:4">Services<small>FastAPI · Python</small></div>
+  <div class="panel" id="svc-panel" style="grid-column:2 / 8; grid-row:4"></div>
+  <div class="card core" id="s-advisor" style="grid-column:2; grid-row:4"><h3>Advisor</h3><p>LLM with tool calling; a guard blocks any price not from the engine</p></div>
+  <div class="card core" id="s-engine" style="grid-column:3; grid-row:4"><h3>Product engine</h3><p>Eligibility, pricing and tiers. Deterministic.</p></div>
+  <div class="card core" id="s-checkout" style="grid-column:4; grid-row:4"><h3>Checkout</h3><p>Re-prices every change on the server; creates the order</p></div>
+  <div class="card core" id="s-kyc" style="grid-column:5; grid-row:4"><h3>Smart KYC</h3><p>OCR and ID checks, verdict with reasons</p></div>
+  <div class="card core" id="s-orders" style="grid-column:6; grid-row:4"><h3>Orders</h3><p>Fulfilment state machine and notifications</p></div>
+  <div class="card core" id="s-console" style="grid-column:7; grid-row:4"><h3>Console</h3><p>Propensity model routes each lead</p></div>
 
-  <!-- ===== column 5: services ===== -->
-  <div class="box svc f1" style="grid-column:5; grid-row:2">
-    <div class="head"><h3><span class="num">1</span>Advisor</h3><span class="sub">advisor/ — orchestrates the conversation</span></div>
-    <div>
-      <div class="chips"><span class="chip">Language detect</span><span class="to">→</span><span class="chip hl">LLM with tool calling</span><span class="to">→</span><span class="chip">Output guard</span><span class="to">→</span><span class="chip">Reply</span><span class="to">·</span><span class="chip">Scripted fallback</span></div>
-      <p>The LLM talks; tools do the work: <span class="mono">lookup_gstin · update_profile · recommend_bundle · check_product · handoff_to_human</span>.</p>
-      <p>Guard: every ₹ amount and product ID must come from a tool result (one retry). A failed or slow turn (35 s) is answered by the rule-based EN / HI / Hinglish advisor.</p>
-    </div>
-  </div>
-  <div class="box svc f2" style="grid-column:5; grid-row:3">
-    <div class="v f1 both"><span>tools: recommend_bundle · check_product</span></div>
-    <div class="head"><h3><span class="num">2</span>Product engine</h3><span class="sub">engine/ — deterministic, no AI</span></div>
-    <div>
-      <div class="chips"><span class="chip">Eligibility rules</span><span class="to">→</span><span class="chip">Pricing</span><span class="to">→</span><span class="chip hl">3-tier recommender</span></div>
-      <p>Catalogue rules: city tier, staff, sites, active GSTIN, required companions. Price falls with term; 5 % off for 3+ categories; micro firms' setup waived on 12+ months; GST 18 %. Tiers carry reason codes.</p>
-    </div>
-  </div>
-  <div class="box svc f2" style="grid-column:5; grid-row:4">
-    <div class="v f2"><span>chosen tier</span></div>
-    <div class="head"><h3>Checkout</h3><span class="sub">checkout/</span></div>
-    <div>
-      <div class="chips"><span class="chip">Edit items &amp; term</span><span class="to">→</span><span class="chip">Server re-prices &amp; validates</span><span class="to">→</span><span class="chip hl">Order: QuoteAccepted</span></div>
-      <p>The browser never sets a price: each change is re-priced and re-checked by the engine.</p>
-    </div>
-  </div>
-  <div class="box svc f3" style="grid-column:5; grid-row:5">
-    <div class="v f3"><span>order needs KYC</span></div>
-    <div class="head"><h3><span class="num">3</span>Smart KYC</h3><span class="sub">kyc/ — automated, explainable</span></div>
-    <div>
-      <div class="chips"><span class="chip">DPDP consent</span><span class="to">→</span><span class="chip">Upload / DigiLocker</span><span class="to">→</span><span class="chip">OCR (Tesseract)</span><span class="to">→</span><span class="chip">Parse &amp; repair IDs</span><span class="to">→</span><span class="chip">6 check layers</span><span class="to">→</span><span class="chip hl">Verdict</span><span class="to">→</span><span class="chip">e-Sign</span></div>
-      <p>Checks: quality (blur, skew) · format (GSTIN / PAN / Udyam, checksum repair) · completeness · registry · cross-document consistency · recency. Verdict: <b>approved</b> · <b>needs action</b> (owner fixes) · <b>review</b> (staff queue) · <b>blocked</b>, each with reasons.</p>
-    </div>
-  </div>
-  <div class="box svc f4" style="grid-column:5; grid-row:6">
-    <div class="v f3"><span>KYCVerified</span></div>
-    <div class="head"><h3><span class="num">4</span>Orders &amp; notifications</h3><span class="sub">orders/ — fulfilment state machine</span></div>
-    <div>
-      <div class="chips"><span class="chip">QuoteAccepted</span><span class="to">→</span><span class="chip">KYCVerified</span><span class="to">→</span><span class="chip">MandateSet</span><span class="to">→</span><span class="chip">InstallScheduled</span><span class="to">→</span><span class="chip">Installed</span><span class="to">→</span><span class="chip hl">Activated</span></div>
-      <p>No fibre at the site → AirFiber reroute with new price. Missed install SLA → delay alert. Each step queues an EN / HI message in the notification outbox.</p>
-    </div>
-  </div>
-  <div class="box svc f5" style="grid-column:5; grid-row:7">
-    <div class="v f4"><span>status · SLA · outcomes</span></div>
-    <div class="head"><h3><span class="num">5</span>Ops console</h3><span class="sub">console/ — role-based (sales · partner)</span></div>
-    <div>
-      <div class="chips"><span class="chip">Propensity model</span><span class="to">→</span><span class="chip hl">Route: digital · partner · field</span><span class="chip">Re-engage list</span><span class="chip">KYC reviews</span><span class="chip">Assisted mode</span></div>
-      <p>Logistic regression on lead features (trained Apr–May, tested June: AUC 0.70, top-decile lift 2.45×). Assisted mode needs a code the owner shares.</p>
-    </div>
-  </div>
+  <!-- external -->
+  <div class="layer" style="grid-row:5">External<small>APIs</small></div>
+  <div class="card" id="x-gemini" style="grid-row:5; grid-column:2"><span class="tag live">LIVE API</span><h3>Gemini</h3><p>Receives chat text only, never documents</p></div>
+  <div class="card mock" id="x-gov" style="grid-row:5; grid-column:5"><span class="tag">MOCK</span><h3>Gov &amp; identity</h3><p>GSTIN, Udyam, DigiLocker, e-Sign</p></div>
+  <div class="card mock" id="x-pay" style="grid-row:5; grid-column:6"><span class="tag">MOCK</span><h3>UPI &amp; WhatsApp</h3><p>Autopay mandate, status messages</p></div>
 
-  <!-- arrows col 6 (service ↔ external) -->
-  <div class="arr f1 both haslbl" style="grid-column:6; grid-row:2"><span class="lbl">prompt + tool<br>definitions ⇄ function<br>calls / reply</span><div class="shaft"></div></div>
-  <div class="arr f1 both haslbl" style="grid-column:6; grid-row:3"><span class="lbl">GSTIN → business<br>profile prefill</span><div class="shaft"></div></div>
-  <div class="arr f3 both haslbl" style="grid-column:6; grid-row:5"><span class="lbl">verify GSTIN / Udyam<br>· pull documents<br>· e-sign OTP</span><div class="shaft"></div></div>
-  <div class="arr f4 both haslbl multi" style="grid-column:6; grid-row:6">
-    <span class="lbl">UPI mandate</span><div class="shaft"></div>
-    <span class="lbl" style="margin-top:14px">notify owner</span><div class="shaft"></div>
-  </div>
+  <!-- data -->
+  <div class="layer" style="grid-row:6">Data<small>SQLite · files</small></div>
+  <div class="panel data" id="data-panel" style="grid-column:2 / 8; grid-row:6"></div>
+  <div class="card" id="d-store" style="grid-row:6; grid-column:2 / 4"><h3>Operational store</h3><p>SQLite documents: sessions, orders, KYC cases, consents, audit log</p></div>
+  <div class="card" id="d-vault" style="grid-row:6; grid-column:4 / 6"><h3>KYC vault</h3><p>Images encrypted at rest, deleted once a decision is made</p></div>
+  <div class="card" id="d-ref" style="grid-row:6; grid-column:6 / 8"><h3>Reference data</h3><p>Product catalogue, historical leads, registry files</p></div>
 
-  <!-- ===== column 7: externals ===== -->
-  <div class="box ext live" style="grid-column:7; grid-row:2">
-    <h3>Google Gemini API <span class="tag live">live</span></h3>
-    <p><span class="mono">gemini-2.5-flash</span> → falls back to <span class="mono">flash-lite</span> → <span class="mono">flash-latest</span> when busy or rate-limited (429 / 503), with retries.</p>
-    <p class="sub">Claude supported as an alternative. Only chat text and tool results are sent, never KYC documents.</p>
-  </div>
-  <div class="box ext" style="grid-column:7; grid-row:3 / 6">
-    <h3>Government &amp; identity <span class="tag">mock</span></h3>
-    <ul class="ext-list">
-      <li><b>GSTIN registry</b> — names, status (Active / Cancelled / Suspended), address</li>
-      <li><b>Udyam registry</b> — enterprise class (micro / small / medium), activity</li>
-      <li><b>DigiLocker</b> — pull issued documents with the owner's consent</li>
-      <li><b>Aadhaar e-Sign</b> — OTP signature on the service agreement</li>
-    </ul>
-    <p class="sub" style="margin-top:4px">Served by <span class="mono">/api/mock/*</span> from the case registry files, in the real APIs' shape so each can be swapped for production.</p>
-  </div>
-  <div class="box ext" style="grid-column:7; grid-row:6">
-    <h3>Payments &amp; messaging</h3>
-    <ul class="ext-list">
-      <li><b>UPI Autopay mandate</b> <span class="tag" style="font:600 8.5px Montserrat;background:var(--saffron-soft);color:#8a4b00;padding:1px 5px;border-radius:3px">mock</span> — monthly debit set-up</li>
-      <li><b>WhatsApp</b> via Twilio sandbox <span class="sub">(optional)</span> — EN / HI status updates</li>
-    </ul>
-  </div>
-  <div class="box ext" style="grid-column:7; grid-row:7; display:flex; flex-direction:column; justify-content:center">
-    <h3>Production hand-offs</h3>
-    <p class="sub">Install scheduling, billing and CRM would subscribe to the same order events; not built in the prototype.</p>
+  <!-- trust -->
+  <div class="layer" style="grid-row:7">Trust</div>
+  <div class="trust" style="grid-row:7; grid-column:2 / 8">
+    <div><b>Consent first</b>DPDP consent ledger, revocable</div>
+    <div><b>Minimal data</b>No IDs in chat; masked on screen</div>
+    <div><b>Short retention</b>Encrypted, auto-deleted images</div>
+    <div><b>Accountable</b>Audit log of consent, KYC and reviews</div>
+    <div><b>Grounded AI</b>Prices come only from the engine</div>
   </div>
 </div>
-
-<!-- data layer -->
-<div class="data">
-  <span class="rw" style="left:403px"></span><span class="rw" style="left:769px"><span class="rwl">read / write</span></span>
-  <div class="title box" style="border:0; background:transparent; box-shadow:none; padding:0">
-    <h2>Data layer</h2>
-    <p>One store module; every write timestamped. Raw documents never enter the operational store.</p>
-  </div>
-  <div class="box store">
-    <h3>Operational store <code>store.py · SQLite</code></h3>
-    <p class="mono">advisor_sessions · orders · kyc_cases · consents · notifications · audit</p>
-  </div>
-  <div class="box store">
-    <h3>KYC vault <code>kyc/vault.py</code></h3>
-    <p>Uploaded images encrypted at rest (Fernet), deleted once no longer needed (≤ 7 days only while a staff review is pending). Extracted fields and a hash remain; screens show masked IDs.</p>
-  </div>
-  <div class="box store">
-    <h3>Reference data <code>data/*.csv</code></h3>
-    <p class="mono">product_catalogue · smb_leads · mock_gstin_registry · mock_udyam_registry</p>
-    <p class="sub">Catalogue drives the rules and prices; leads train the propensity model.</p>
-  </div>
-</div>
-
-<!-- privacy strip -->
-<div class="trust">
-  <h3>Privacy &amp; security by design</h3>
-  <ul>
-    <li>DPDP consent ledger: purpose-bound, revocable</li>
-    <li>Chat never asks for Aadhaar, PAN or bank details; IDs typed in chat are masked</li>
-    <li>Encrypted vault and deletion of raw images after the decision</li>
-    <li>Audit log of consent, document, verification, review and assisted-mode events</li><li>Role-based console: partners see only leads routed to them</li>
-    <li>The AI cannot invent prices or products (output guard)</li>
-  </ul>
-</div>
-
-<!-- flow key -->
-<div class="flowkey">
-  <section class="f1">
-    <h3><span class="svc f1" style="all:unset"><span class="num" style="display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--f1);color:#fff;font:700 10px Montserrat">1</span></span>Discover</h3>
-    <ol>
-      <li>Owner chats or speaks in their language.</li>
-      <li>Advisor sends the turn to Gemini, which calls tools: GSTIN lookup prefills the profile; the engine checks eligibility.</li>
-      <li>Guard checks the draft reply; tier cards appear after ~5 questions.</li>
-    </ol>
-  </section>
-  <section class="f2">
-    <h3><span class="num" style="display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--f2);color:#fff;font:700 10px Montserrat">2</span>Quote &amp; accept</h3>
-    <ol>
-      <li>Owner picks a tier, toggles items, chooses the term.</li>
-      <li>Checkout re-prices each change through the engine (rules, discounts, GST).</li>
-      <li>Accept creates the order in state <b>QuoteAccepted</b>.</li>
-    </ol>
-  </section>
-  <section class="f3">
-    <h3><span class="num" style="display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--f3);color:#fff;font:700 10px Montserrat">3</span>Verify (Smart KYC)</h3>
-    <ol>
-      <li>Owner gives consent, then uploads documents or uses DigiLocker.</li>
-      <li>OCR and ID checks against the registries produce a verdict with reasons; unclear cases go to staff review.</li>
-      <li>E-sign moves the order to <b>KYCVerified</b>.</li>
-    </ol>
-  </section>
-  <section class="f4">
-    <h3><span class="num" style="display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--f4);color:#fff;font:700 10px Montserrat">4</span>Activate &amp; track</h3>
-    <ol>
-      <li>UPI mandate, then installation is scheduled and completed.</li>
-      <li>Reroutes and delays are handled in the state machine.</li>
-      <li>Each step notifies the owner in-app and on WhatsApp, ending at <b>Activated</b>.</li>
-    </ol>
-  </section>
-  <section class="f5">
-    <h3><span class="num" style="display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--f5);color:#fff;font:700 10px Montserrat">5</span>Learn &amp; route</h3>
-    <ol>
-      <li>The console scores every lead and routes it: digital, partner or field.</li>
-      <li>Stalled leads go on a re-engage list; staff clear the KYC review queue.</li>
-      <li>Partners can help an owner in assisted mode, with the owner's code.</li>
-    </ol>
-  </section>
+<svg id="wires"></svg>
 </div>
 
 <footer>
-  <span>Prototype: React + TypeScript PWA · FastAPI · SQLite · Gemini · Tesseract OCR — github.com/AgileSeagull/AirtelSync</span>
-  <span>Accel Business is the case's fictional operator. Registries, DigiLocker, e-Sign and UPI are mocks for the prototype.</span>
+  <span>Prototype stack: React + TypeScript (Vite) · FastAPI · SQLite · Gemini API · Tesseract OCR</span>
+  <span>github.com/AgileSeagull/AirtelSync</span>
 </footer>
 
+<script>
+const NS = "http://www.w3.org/2000/svg";
+function draw() {
+  const svg = document.getElementById("wires"), wrap = document.getElementById("wrap");
+  const o = wrap.getBoundingClientRect();
+  svg.setAttribute("width", o.width); svg.setAttribute("height", o.height);
+  svg.innerHTML = `<defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M1 1 L9 5 L1 9" fill="none" stroke="#aab6b4" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M1 1 L9 5 L1 9" fill="none" stroke="#0b5d5b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>`;
+  const r = (id) => { const b = document.getElementById(id).getBoundingClientRect();
+    return { l: b.left - o.left, r: b.right - o.left, t: b.top - o.top, b: b.bottom - o.top, cx: (b.left + b.right) / 2 - o.left, cy: (b.top + b.bottom) / 2 - o.top }; };
+  const line = (x1, y1, x2, y2, acc, both) => {
+    const p = document.createElementNS(NS, "line");
+    Object.entries({ x1, y1, x2, y2, stroke: acc ? "#0b5d5b" : "#aab6b4", "stroke-width": acc ? 2 : 1.5,
+      "marker-end": `url(#${acc ? "b" : "a"})` }).forEach(([k, v]) => p.setAttribute(k, v));
+    if (both) p.setAttribute("marker-start", `url(#${acc ? "b" : "a"})`);
+    svg.appendChild(p);
+  };
+  const label = (x, y, s, anchor = "middle") => { const t = document.createElementNS(NS, "text");
+    t.setAttribute("x", x); t.setAttribute("y", y); t.setAttribute("text-anchor", anchor); t.textContent = s; svg.appendChild(t); };
+  const PAD = 3;
+  // vertical: from the bottom of a to the top of b, at b's centre (or a given x)
+  const down = (a, b, x, both = true) => { const A = r(a), B = r(b); x = x ?? B.cx; line(x, A.b + PAD, x, B.t - PAD, false, both); };
+  // horizontal: a -> b along a's middle
+  const across = (a, b, text) => { const A = r(a), B = r(b), y = A.cy;
+    const [x1, x2] = A.r < B.l ? [A.r + PAD, B.l - PAD] : [A.l - PAD, B.r + PAD];
+    line(x1, y, x2, y, true, false); if (text) label((x1 + x2) / 2, y - 8, text); };
+
+  // users -> web app
+  ["w-chat", "w-quote", "w-kyc", "w-track"].forEach((w) => down("owner", w, undefined, false));
+  down("staff", "w-console", undefined, false);
+  // web app <-> services
+  down("w-chat", "s-advisor"); down("w-quote", "s-checkout", r("s-checkout").cx);
+  down("w-kyc", "s-kyc"); down("w-track", "s-orders"); down("w-console", "s-console");
+  // journey hand-offs inside the service layer
+  across("s-advisor", "s-engine", "tools");
+  across("s-checkout", "s-engine", "price");
+  across("s-checkout", "s-kyc", "order");
+  across("s-kyc", "s-orders", "verified");
+  // services <-> external
+  down("s-advisor", "x-gemini"); down("s-kyc", "x-gov"); down("s-orders", "x-pay");
+  // services <-> data, through the empty external slots
+  const P = r("svc-panel");
+  const D = r("data-panel");
+  ["s-engine", "s-console"].forEach((s) => { const x = r(s).cx; line(x, P.b + PAD, x, D.t - PAD, false, true); });
+  label(r("s-engine").cx + 10, (P.b + D.t) / 2 + 4, "read / write", "start");
+  window.__drawn = true;
+}
+document.fonts.ready.then(() => requestAnimationFrame(draw));
+</script>
 </body>
 </html>
