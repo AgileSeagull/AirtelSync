@@ -117,6 +117,13 @@ python docs/deck/build_deck.py "../Submission Template_Sync.pptx" docs/deck/Airt
 
 Slides use Montserrat (available in Google Slides; install it locally for PowerPoint).
 
+## Solution architecture
+
+`docs/architecture/AirtelSync_Solution_Architecture.pdf`: one A3 landscape page with the main components (channels,
+PWA screens, FastAPI services, external services, data layer) and the five numbered data flows (discover, quote,
+verify, activate, learn & route). The source is `docs/architecture/architecture.html`; re-render with
+`services/api/.venv/bin/python docs/architecture/render.py` (Playwright + installed Chrome).
+
 ## Run everything
 
 ```bash
