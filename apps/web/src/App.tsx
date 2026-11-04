@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { api, type Lang, type SessionView, type Tier } from "./api";
 import { Chat } from "./components/Chat";
+import { Kyc } from "./components/Kyc";
 import { OrderPlaced } from "./components/OrderPlaced";
 import { QuoteBuilder } from "./components/QuoteBuilder";
 import { Welcome } from "./components/Welcome";
@@ -11,7 +12,8 @@ type Route =
   | { name: "chat"; sid: string }
   | { name: "quote"; sid: string; tier: Tier["tier"] }
   | { name: "order"; oid: string }
-  | { name: "kyc"; oid: string };
+  | { name: "kyc"; oid: string | null }
+  | { name: "track"; oid: string };
 
 function parse(hash: string): Route {
   const [, a, b, c] = hash.replace(/^#/, "").split("/");
@@ -19,6 +21,8 @@ function parse(hash: string): Route {
   if (a === "quote" && b && c) return { name: "quote", sid: b, tier: c as Tier["tier"] };
   if (a === "order" && b) return { name: "order", oid: b };
   if (a === "kyc" && b) return { name: "kyc", oid: b };
+  if (a === "kyc-demo") return { name: "kyc", oid: null };
+  if (a === "track" && b) return { name: "track", oid: b };
   return { name: "welcome" };
 }
 
@@ -35,7 +39,8 @@ export default function App() {
   const [lang, setLangState] = useState<Lang>(storedLang);
   const [session, setSession] = useState<SessionView | null>(null);
   const [busy, setBusy] = useState(false);
-  const tr = t(session?.lang || lang);
+  const activeLang = session?.lang || lang;
+  const tr = useMemo(() => t(activeLang), [activeLang]);
 
   useEffect(() => {
     const on = () => setRoute(parse(window.location.hash));
@@ -82,7 +87,10 @@ export default function App() {
   } else if (route.name === "order") {
     body = <OrderPlaced orderId={route.oid} tr={tr} onKyc={() => go(`/kyc/${route.oid}`)} />;
   } else if (route.name === "kyc") {
-    body = <main className="done"><h2>{tr("nextKyc")}</h2><p className="muted">{tr("nextKycBody")}</p></main>;
+    title = tr("kycTitle");
+    body = <Kyc key={route.oid || "demo"} orderId={route.oid} lang={session?.lang || lang} tr={tr} onTrack={(oid) => go(`/track/${oid}`)} />;
+  } else if (route.name === "track") {
+    body = <main className="done"><h2>{tr("trackOrder")}</h2><p className="ref">{route.oid}</p></main>;
   }
 
   return (

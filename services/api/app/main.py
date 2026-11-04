@@ -11,6 +11,7 @@ from .advisor.api import router as advisor_router
 from .checkout.api import router as checkout_router
 from .config import REPO_ROOT
 from .engine.api import router as engine_router
+from .kyc.api import router as kyc_router
 from .mocks.registry import router as mock_router
 
 app = FastAPI(title="Udyam Digital API", version="0.3.0",
@@ -18,7 +19,7 @@ app = FastAPI(title="Udyam Digital API", version="0.3.0",
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 api = APIRouter(prefix="/api")
-for r in (engine_router, mock_router, advisor_router, checkout_router):
+for r in (engine_router, mock_router, advisor_router, checkout_router, kyc_router):
     api.include_router(r)
 
 

@@ -2,7 +2,10 @@ import os
 
 import pytest
 
+import tempfile
+
 os.environ.setdefault("UDYAM_ADVISOR_MODE", "scripted")  # tests never call the real API unless they opt in
+os.environ.setdefault("UDYAM_VAULT_DIR", tempfile.mkdtemp(prefix="udyam-vault-"))
 
 from app import store  # noqa: E402
 

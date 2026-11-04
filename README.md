@@ -33,6 +33,38 @@ cd services/api
 .venv/bin/python -m evals.run_advisor_evals --llm    # same scenarios through Claude
 ```
 
+## Smart KYC
+
+Consent notice (DPDP: purpose-wise, no pre-ticked optional purposes, versioned, withdrawable) → documents by
+photo/upload or **DigiLocker (mock)** → local OCR (Tesseract; red-channel watermark removal, deskew, blur score)
+→ five layers of checks → verdict: `approved` · `needs_action` (owner can fix in-app) · `review` (specialist) ·
+`blocked` (e.g. cancelled GSTIN) → Aadhaar e-sign (mock, demo OTP `123456`) → order moves to `KYCVerified`.
+
+| Layer | Checks |
+|---|---|
+| Quality | blur (Laplacian variance), skew auto-correction, unreadable fields |
+| Completeness | GST/Udyam, signatory ID, address proof; missing Udyam offered from the registry |
+| Format | GSTIN repaired from OCR via structure + checksum + registry (accepted only if the name agrees); Udyam number |
+| Registry | GSTIN exists and is **Active**; legal/trade name, constitution, address vs GST records; Udyam number, name, city |
+| Consistency / recency | business name across all documents; address proof vs registered address; proprietor = signatory; bill ≤ 90 days; ID validity |
+
+Raw images are encrypted at rest (Fernet) and deleted as soon as a decision is made (kept ≤ 7 days only for a
+manual review); IDs are masked in every API response; every consent and document event is written to an audit log.
+
+```bash
+cd services/api && .venv/bin/python -m evals.run_kyc_evals -v    # 12/12 specimen applicants vs our answer key
+```
+
+| Applicant | Verdict | Why |
+|---|---|---|
+| K01 | blocked | GSTIN cancelled in GST records; Udyam certificate has no number and no registration exists |
+| K02 | approved | photo tilted 7°, straightened automatically |
+| K04 | needs_action | GST certificate too blurry → retake or fetch from DigiLocker |
+| K05 | needs_action | Udyam certificate missing → registry match offered for one-tap confirmation |
+| K07 | review | legal name on certificate altered ("Shri Physio Clinic" vs registry "Neelgiri Physio Clinic") |
+| K11 | needs_action | electricity bill dated 31 Oct 2025, older than 90 days |
+| K03, K06, K08, K09, K10, K12 | approved | clean (GSTIN OCR errors corrected) |
+
 ## Run everything
 
 ```bash
@@ -68,7 +100,7 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 | 1 | Core engine: catalogue, eligibility, dependencies, pricing, recommendation, mock GSTIN/Udyam APIs | done |
 | 2 | GenAI advisor: tool-calling loop, multilingual, output guard, eval harness | done |
 | 3 | Owner web app: chat, quote & checkout with toggles | done |
-| 4 | Smart KYC: consent, OCR, layered checks, verdicts | |
+| 4 | Smart KYC: consent, OCR, layered checks, verdicts | done |
 | 5 | Order tracker: state machine, ETAs, notifications | |
 | 6 | Back office: lead console, propensity score | |
 

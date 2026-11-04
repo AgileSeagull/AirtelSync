@@ -80,6 +80,59 @@ export const api = {
   order: (oid: string) => call<any>(`/checkout/orders/${oid}`),
 };
 
+// ------------------------------------------------------------------ KYC
+export type DocType = "gst_certificate" | "udyam_certificate" | "signatory_id" | "address_proof";
+export type CheckStatus = "pass" | "info" | "action" | "review" | "block";
+export interface KycCheck {
+  code: string; layer: string; status: CheckStatus; title: string; message: string;
+  doc_type: DocType | null; action: "retake" | "upload" | "confirm_udyam" | "digilocker" | "none";
+}
+export interface KycDoc {
+  id: string; doc_type: DocType; label: string; source: "upload" | "digilocker" | "registry" | "sample";
+  filename: string | null; quality: Record<string, any>; fields: Record<string, any>; raw_deleted: boolean;
+}
+export interface KycCase {
+  id: string; order_id: string | null; lang: Lang; consent_id: string | null;
+  verdict: "pending" | "approved" | "needs_action" | "review" | "blocked";
+  verified_at: string | null; esigned_at: string | null; documents: Partial<Record<DocType, KycDoc>>;
+  required: DocType[]; checks: KycCheck[]; demo_otp: string;
+}
+export interface Notice {
+  version: string; title: string; intro: string; collect: string[]; use: string; how: string; keep: string;
+  rights: string; purposes: Record<string, string>; agree: string;
+}
+
+async function upload<T>(path: string, form: FormData): Promise<T> {
+  const res = await fetch(`/api${path}`, { method: "POST", body: form });
+  if (!res.ok) {
+    let detail: any;
+    try { detail = await res.json(); } catch { /* ignore */ }
+    throw new ApiError(res.status, typeof detail?.detail === "string" ? detail.detail : `Upload failed (${res.status})`);
+  }
+  return res.json() as Promise<T>;
+}
+
+export const kyc = {
+  notice: (lang: Lang) => call<Notice>(`/kyc/notice?lang=${lang}`),
+  create: (order_id: string | null, lang: Lang) => call<KycCase>("/kyc/cases", { method: "POST", body: JSON.stringify({ order_id, lang }) }),
+  get: (id: string) => call<KycCase>(`/kyc/cases/${id}`),
+  consent: (id: string, purposes: string[], lang: Lang) =>
+    call<{ case: KycCase }>(`/kyc/cases/${id}/consent`, { method: "POST", body: JSON.stringify({ purposes, lang }) }),
+  withdraw: (id: string) => call<KycCase>(`/kyc/cases/${id}/consent`, { method: "DELETE" }),
+  upload: (id: string, file: File, docType: DocType) => {
+    const f = new FormData();
+    f.append("file", file);
+    f.append("doc_type", docType);
+    return upload<{ document_type: DocType; case: KycCase }>(`/kyc/cases/${id}/documents`, f);
+  },
+  sample: (id: string, applicant: string) => call<KycCase>(`/kyc/cases/${id}/sample/${applicant}`, { method: "POST" }),
+  digilocker: (id: string, gstin: string | null) =>
+    call<KycCase>(`/kyc/cases/${id}/digilocker`, { method: "POST", body: JSON.stringify({ gstin }) }),
+  confirmUdyam: (id: string) => call<KycCase>(`/kyc/cases/${id}/confirm-udyam`, { method: "POST" }),
+  verify: (id: string) => call<KycCase>(`/kyc/cases/${id}/verify`, { method: "POST" }),
+  esign: (id: string, otp: string) => call<KycCase>(`/kyc/cases/${id}/esign`, { method: "POST", body: JSON.stringify({ otp }) }),
+};
+
 // Indian digit grouping: 1,23,456
 export function inr(n: number): string {
   return "₹" + Math.round(n).toLocaleString("en-IN");

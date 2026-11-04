@@ -1,0 +1,15 @@
+# Our own answer key for the 12 specimen applicants (derived by inspecting the documents
+# and the mock registries). verdict: approved | needs_action | review | blocked
+# codes: non-passing checks that must be raised (others may also appear only as info).
+K01: {verdict: blocked, codes: [R_GST_STATUS, F_UDYAM_NUMBER], why: "GSTIN cancelled; Udyam certificate has no number and no Udyam registration exists"}
+K02: {verdict: approved, info: [Q_SKEW], why: "Tilted scan; straightened automatically and all checks pass"}
+K03: {verdict: approved, why: "Clean application"}
+K04: {verdict: needs_action, codes: [Q_BLUR], why: "GST certificate photo too blurry to read; retake or fetch from DigiLocker"}
+K05: {verdict: needs_action, codes: [C_UDYAM], why: "Udyam certificate missing; registry has one to confirm"}
+K06: {verdict: approved, why: "Clean application (GSTIN OCR corrected via registry)"}
+K07: {verdict: review, codes: [R_GST_LEGAL_NAME], why: "Legal name on GST certificate altered ('Shri Physio Clinic' vs registry 'Neelgiri Physio Clinic')"}
+K08: {verdict: approved, why: "Clean application"}
+K09: {verdict: approved, why: "Clean application"}
+K10: {verdict: approved, why: "Clean application"}
+K11: {verdict: needs_action, codes: [D_ADDRESS_DATE], why: "Address proof dated 2025-10-31, older than 90 days"}
+K12: {verdict: approved, why: "Clean application"}
