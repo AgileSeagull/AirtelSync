@@ -1,0 +1,206 @@
+import type { Lang } from "./api";
+
+export const LANGUAGES: { code: Lang; native: string; english: string; speech: string }[] = [
+  { code: "hi", native: "हिन्दी", english: "Hindi", speech: "hi-IN" },
+  { code: "en", native: "English", english: "English", speech: "en-IN" },
+  { code: "mr", native: "मराठी", english: "Marathi", speech: "mr-IN" },
+  { code: "ta", native: "தமிழ்", english: "Tamil", speech: "ta-IN" },
+  { code: "te", native: "తెలుగు", english: "Telugu", speech: "te-IN" },
+  { code: "kn", native: "ಕನ್ನಡ", english: "Kannada", speech: "kn-IN" },
+  { code: "gu", native: "ગુજરાતી", english: "Gujarati", speech: "gu-IN" },
+  { code: "bn", native: "বাংলা", english: "Bengali", speech: "bn-IN" },
+  { code: "pa", native: "ਪੰਜਾਬੀ", english: "Punjabi", speech: "pa-IN" },
+  { code: "ml", native: "മലയാളം", english: "Malayalam", speech: "ml-IN" },
+];
+
+const en = {
+  tagline: "Internet, phones, billing and CCTV for your business, sorted in one sitting.",
+  promise1: "Get a plan in 5 questions",
+  promise2: "One clear monthly price",
+  promise3: "Verify your business online, no visit",
+  chooseLang: "Choose your language",
+  start: "Start",
+  typeHere: "Type your answer…",
+  send: "Send",
+  listening: "Listening…",
+  thinking: "Udyam Saathi is typing…",
+  plans: "Plans for you",
+  essential: "Essential",
+  recommended: "Recommended",
+  complete: "Complete",
+  bestFit: "Best fit",
+  perMonth: "/month",
+  inclGst: "incl. GST",
+  setup: "one-time setup",
+  noSetup: "No setup charge",
+  readyIn: "Ready in about {n} days",
+  whyThis: "Why",
+  customise: "Customise & continue",
+  viewPlans: "View plans",
+  yourPlan: "Your plan",
+  contract: "Plan length",
+  flexible: "Flexible",
+  months12: "12 months",
+  months24: "24 months",
+  saveMore: "Lower monthly price",
+  required: "Needed",
+  addMore: "Add more services",
+  locked: "Not available yet",
+  from: "from",
+  add: "Add",
+  remove: "Remove",
+  subtotal: "Subtotal",
+  discount: "Bundle discount",
+  gst: "GST 18%",
+  monthly: "Monthly total",
+  setupTotal: "One-time setup (incl. GST)",
+  waived: "Setup waived",
+  vsToday: "Compared with today",
+  moreThanToday: "{x} more than today",
+  lessThanToday: "You save {x} every month",
+  accept: "Accept quote",
+  priceRule: "How we price: longer plans get a lower monthly rate; 3+ kinds of services get 5% off.",
+  fixIt: "Fix",
+  orderPlaced: "Quote accepted",
+  orderId: "Application number",
+  nextKyc: "Next: verify your business",
+  nextKycBody: "Upload your GST or Udyam certificate, ID and an address proof. Most checks finish instantly.",
+  continueKyc: "Verify now",
+  handoff: "An Accel Business expert will call you within 4 working hours.",
+  chips_gstin: ["I don't have a GSTIN"],
+  chips_employees: ["Just me", "2 people", "5 people", "15 people, 2 branches"],
+  chips_needs: ["UPI billing", "CCTV", "WhatsApp for customers", "Business email", "That's all"],
+  chips_business_type: ["Kirana store", "Clinic", "Coaching centre", "Restaurant chain", "Small factory"],
+  chips_city: ["Delhi", "Mumbai", "Pune", "Jaipur", "Lucknow"],
+  talkToPerson: "Talk to a person",
+  restart: "Start again",
+  error: "Something went wrong. Please try again.",
+};
+
+type Dict = typeof en;
+
+const hi: Partial<Dict> = {
+  tagline: "आपके बिज़नेस के लिए इंटरनेट, फ़ोन, बिलिंग और CCTV — एक ही बार में।",
+  promise1: "5 सवालों में सही प्लान",
+  promise2: "महीने की एक साफ़ कीमत",
+  promise3: "बिना विज़िट के ऑनलाइन वेरिफ़िकेशन",
+  chooseLang: "अपनी भाषा चुनें",
+  start: "शुरू करें",
+  typeHere: "अपना जवाब लिखें…",
+  send: "भेजें",
+  listening: "सुन रहा हूँ…",
+  thinking: "Udyam Saathi लिख रहा है…",
+  plans: "आपके लिए प्लान",
+  essential: "ज़रूरी",
+  recommended: "सुझाया गया",
+  complete: "संपूर्ण",
+  bestFit: "सबसे सही",
+  perMonth: "/महीना",
+  inclGst: "GST सहित",
+  setup: "एक बार का सेटअप",
+  noSetup: "कोई सेटअप चार्ज नहीं",
+  readyIn: "लगभग {n} दिन में चालू",
+  whyThis: "क्यों",
+  customise: "बदलें और आगे बढ़ें",
+  viewPlans: "प्लान देखें",
+  yourPlan: "आपका प्लान",
+  contract: "प्लान की अवधि",
+  flexible: "फ़्लेक्सिबल",
+  months12: "12 महीने",
+  months24: "24 महीने",
+  saveMore: "कम मासिक कीमत",
+  required: "ज़रूरी",
+  addMore: "और सेवाएँ जोड़ें",
+  locked: "अभी उपलब्ध नहीं",
+  from: "से शुरू",
+  add: "जोड़ें",
+  remove: "हटाएँ",
+  subtotal: "कुल",
+  discount: "बंडल छूट",
+  monthly: "महीने का कुल",
+  setupTotal: "एक बार का सेटअप (GST सहित)",
+  waived: "सेटअप माफ़",
+  vsToday: "अभी के खर्च से तुलना",
+  moreThanToday: "अभी से {x} ज़्यादा",
+  lessThanToday: "हर महीने {x} की बचत",
+  accept: "कोटेशन स्वीकार करें",
+  priceRule: "कीमत कैसे तय होती है: लंबे प्लान पर कम मासिक दर; 3 या ज़्यादा तरह की सेवाओं पर 5% छूट।",
+  fixIt: "ठीक करें",
+  orderPlaced: "कोटेशन स्वीकार हुआ",
+  orderId: "आवेदन नंबर",
+  nextKyc: "अगला कदम: बिज़नेस वेरिफ़िकेशन",
+  nextKycBody: "GST या Udyam सर्टिफ़िकेट, ID और पते का प्रमाण अपलोड करें। ज़्यादातर जाँच तुरंत हो जाती है।",
+  continueKyc: "अभी वेरिफ़ाई करें",
+  handoff: "Accel Business के विशेषज्ञ 4 कामकाजी घंटों में आपको कॉल करेंगे।",
+  chips_gstin: ["मेरे पास GSTIN नहीं है"],
+  chips_employees: ["सिर्फ़ मैं", "2 लोग", "5 लोग", "15 लोग, 2 ब्रांच"],
+  chips_needs: ["UPI बिलिंग", "CCTV कैमरा", "ग्राहकों के लिए WhatsApp", "बिज़नेस ईमेल", "बस इतना ही"],
+  chips_business_type: ["किराना दुकान", "क्लिनिक", "कोचिंग सेंटर", "रेस्टोरेंट", "छोटी फैक्ट्री"],
+  chips_city: ["दिल्ली", "मुंबई", "पुणे", "जयपुर", "लखनऊ"],
+  talkToPerson: "किसी से बात करें",
+  restart: "फिर से शुरू करें",
+  error: "कुछ गड़बड़ हो गई। कृपया फिर से कोशिश करें।",
+};
+
+const TABLES: Partial<Record<Lang, Partial<Dict>>> = { en, hi };
+
+export function t(lang: Lang) {
+  const table = { ...en, ...(TABLES[lang] || {}) } as Dict;
+  return function tr<K extends keyof Dict>(key: K, vars?: Record<string, string | number>): Dict[K] {
+    const v = table[key];
+    if (typeof v === "string" && vars) {
+      let out: string = v;
+      for (const [k, val] of Object.entries(vars)) out = out.replace(`{${k}}`, String(val));
+      return out as Dict[K];
+    }
+    return v;
+  };
+}
+export type Tr = ReturnType<typeof t>;
+
+// Reason codes from the engine, localised. English falls back to the engine's own text.
+const NEEDS_HI: Record<string, string> = {
+  internet: "भरोसेमंद इंटरनेट", mobile_lines: "बिज़नेस मोबाइल नंबर", billing_pos: "GST बिलिंग और UPI/कार्ड पेमेंट",
+  whatsapp: "ग्राहकों के लिए WhatsApp", sms: "बल्क SMS", website: "अपनी वेबसाइट", cctv: "मोबाइल पर देखने वाला CCTV",
+  email_office: "बिज़नेस ईमेल और ऑफ़िस टूल", backup: "डेटा बैकअप", device_security: "एंटीवायरस सुरक्षा",
+  firewall: "नेटवर्क फ़ायरवॉल", guest_wifi: "ग्राहकों के लिए Wi-Fi", failover: "लाइन बंद होने पर भी इंटरनेट",
+  telephony: "IVR और कॉल रिकॉर्डिंग वाली ऑफ़िस लाइन", toll_free: "1800 टोल-फ़्री नंबर", static_ip: "फ़िक्स्ड IP",
+  machine_monitoring: "मशीन मॉनिटरिंग", fleet_tracking: "गाड़ियों की GPS ट्रैकिंग", multi_site_network: "सभी ब्रांच का एक नेटवर्क",
+  dedicated_line: "SLA वाली डेडिकेटेड लाइन", high_speed: "बहुत तेज़ इंटरनेट",
+};
+const REASONS_HI: Record<string, string> = {
+  CONN_BASE: "दुकान/ऑफ़िस के लिए तेज़, अनलिमिटेड बिज़नेस इंटरनेट",
+  CONN_UPGRADE_HOTSPOT: "मोबाइल हॉटस्पॉट की जगह UPI और बिलिंग के लिए स्थिर लाइन",
+  CONN_STAFF_SIZE: "आपके स्टाफ़ की संख्या के हिसाब से",
+  CONN_HIGH_SPEED: "आपको बहुत तेज़ इंटरनेट चाहिए",
+  CONN_DEDICATED: "फ़ैक्ट्री के लिए SLA वाली डेडिकेटेड लाइन",
+  CONN_FIBRE_NOT_FEASIBLE: "आपके पते पर फ़ाइबर नहीं है; 5G AirFiber 2 दिन में लग जाता है",
+  CONN_PER_SITE: "हर ब्रांच पर एक लाइन",
+  LINES_STAFF: "आपके और स्टाफ़ के लिए बिज़नेस नंबर",
+  PROTECT: "बिज़नेस को ऑनलाइन और डेटा को सुरक्षित रखता है",
+};
+
+export function whyText(lang: Lang, codes: string[], fallback: string): string {
+  if (lang !== "hi") return fallback;
+  const parts = codes.map((c) => {
+    if (REASONS_HI[c]) return REASONS_HI[c];
+    if (c.startsWith("NEED_")) return "आपने माँगा: " + (NEEDS_HI[c.slice(5).toLowerCase()] || c.slice(5).toLowerCase());
+    if (c.startsWith("SEG_")) return "आपके जैसे बिज़नेस में लोकप्रिय";
+    if (c.startsWith("DEP_FOR_")) return "दूसरी सेवा के लिए ज़रूरी";
+    return "";
+  }).filter(Boolean);
+  return parts.length ? parts.join("; ") : fallback;
+}
+
+const LOCKED_HI: Record<string, string> = {
+  gstin: "इसके लिए सक्रिय GST रजिस्ट्रेशन ज़रूरी है",
+  min_employees: "यह बड़े स्टाफ़ वाले बिज़नेस के लिए है",
+  min_sites: "यह कई ब्रांच वाले बिज़नेस के लिए है",
+  city_tier: "यह अभी आपके शहर में उपलब्ध नहीं है",
+  dependency: "इसके लिए बंडल में इंटरनेट लाइन ज़रूरी है",
+};
+
+export function lockedText(lang: Lang, rule: string | null, fallback: string | null): string | null {
+  if (lang === "hi" && rule && LOCKED_HI[rule]) return LOCKED_HI[rule];
+  return fallback;
+}

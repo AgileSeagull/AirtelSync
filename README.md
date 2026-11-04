@@ -10,6 +10,7 @@ price, completes KYC in minutes, and tracks installation without calling support
 
 ```
 data/                 case CSVs + specimen KYC documents (synthetic)
+apps/web/             React + Vite PWA (owner journey)
 services/api/         FastAPI backend
   app/engine/         eligibility, pricing, recommendation (pure functions)
   app/ids/            GSTIN (checksum) and Udyam validators
@@ -32,6 +33,25 @@ cd services/api
 .venv/bin/python -m evals.run_advisor_evals --llm    # same scenarios through Claude
 ```
 
+## Run everything
+
+```bash
+# one-time setup
+cd services/api && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt && cd ../..
+cd apps/web && npm install && cd ../..
+
+# development: API on :8000, web app on http://localhost:5173
+./scripts/dev.sh
+
+# demo / single process: build the web app, FastAPI serves it at http://localhost:8000
+cd apps/web && npm run build && cd ../../services/api && .venv/bin/uvicorn app.main:app --port 8000
+```
+
+The owner app is a mobile-first PWA in 10 languages (full UI strings in English and Hindi): language picker →
+advisor chat (text or voice via the browser's speech recognition) → three plan cards → quote builder with
+item toggles, quantities, plan length (flexible / 12 / 24 months), one-tap fixes for broken dependencies,
+locked add-ons with the reason → accepted quote with an application number.
+
 ## Run the API
 
 ```bash
@@ -47,7 +67,7 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 |---|---|---|
 | 1 | Core engine: catalogue, eligibility, dependencies, pricing, recommendation, mock GSTIN/Udyam APIs | done |
 | 2 | GenAI advisor: tool-calling loop, multilingual, output guard, eval harness | done |
-| 3 | Owner web app: chat, quote & checkout with toggles | |
+| 3 | Owner web app: chat, quote & checkout with toggles | done |
 | 4 | Smart KYC: consent, OCR, layered checks, verdicts | |
 | 5 | Order tracker: state machine, ETAs, notifications | |
 | 6 | Back office: lead console, propensity score | |

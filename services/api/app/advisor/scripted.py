@@ -176,11 +176,24 @@ def _recommend(session: AdvisorSession) -> str:
     p = session.profile
     msg = _t(session, "recommend", business=p.get("business_type", "business").lower(), city=p.get("city", ""),
              items=_items(tier), total=_fmt(q["monthly_total"]), setup=setup, days=q["earliest_activation_days"], diff=diff)
-    notes = out.get("notes") or []
+    notes = [_localise_note(session, n) for n in (out.get("notes") or [])]
     if notes:
         msg += " " + " ".join(notes)
     session.last_asked = None
     return msg
+
+
+def _localise_note(session: AdvisorSession, note: str) -> str:
+    if session.lang != "hi":
+        return note
+    if note.startswith("Register for GST to unlock:"):
+        return "GST रजिस्ट्रेशन करवाने पर ये भी मिल सकते हैं:" + note.split(":", 1)[1]
+    if note.startswith("Your GSTIN is"):
+        status = "रद्द" if "cancelled" in note else "निलंबित"
+        return f"आपका GSTIN {status} है, इसलिए GST रजिस्ट्रेशन वाली सेवाएँ नहीं दी जा सकतीं।"
+    if note.startswith("A leased line is not possible"):
+        return "अभी लीज़्ड लाइन संभव नहीं है, इसलिए हम बिज़नेस फ़ाइबर सुझा रहे हैं।"
+    return note
 
 
 def describe_need(need: str) -> str:

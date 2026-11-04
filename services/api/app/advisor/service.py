@@ -43,6 +43,7 @@ def view(s: AdvisorSession) -> dict:
         "session_id": s.id,
         "lang": s.lang,
         "status": s.status,
+        "last_asked": s.last_asked,
         "profile": profile_slots.public_view(s.profile),
         "missing": profile_slots.missing(s.profile),
         "recommendation": s.recommendation,

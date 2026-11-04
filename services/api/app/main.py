@@ -1,21 +1,42 @@
-"""Udyam Digital API."""
+"""Udyam Digital API. All JSON routes live under /api; the built web app is served at /."""
 from __future__ import annotations
 
-from fastapi import FastAPI
+
+from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from .advisor.api import router as advisor_router
+from .checkout.api import router as checkout_router
+from .config import REPO_ROOT
 from .engine.api import router as engine_router
 from .mocks.registry import router as mock_router
 
-app = FastAPI(title="Udyam Digital API", version="0.1.0",
+app = FastAPI(title="Udyam Digital API", version="0.3.0",
               description="Digital-first MSME acquisition and onboarding for Accel Business (hackathon prototype).")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
-app.include_router(engine_router)
-app.include_router(mock_router)
-app.include_router(advisor_router)
+
+api = APIRouter(prefix="/api")
+for r in (engine_router, mock_router, advisor_router, checkout_router):
+    api.include_router(r)
 
 
-@app.get("/health")
+@api.get("/health")
 def health() -> dict:
     return {"status": "ok"}
+
+
+app.include_router(api)
+
+# Serve the built PWA (apps/web/dist) when present: one process for the demo.
+WEB_DIST = REPO_ROOT / "apps" / "web" / "dist"
+if WEB_DIST.exists():
+    app.mount("/assets", StaticFiles(directory=WEB_DIST / "assets"), name="assets")
+
+    @app.get("/{path:path}", include_in_schema=False)
+    def spa(path: str):
+        f = WEB_DIST / path
+        if path and f.is_file() and WEB_DIST in f.resolve().parents:
+            return FileResponse(f)
+        return FileResponse(WEB_DIST / "index.html")

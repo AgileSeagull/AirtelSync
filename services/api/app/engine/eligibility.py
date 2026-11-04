@@ -45,7 +45,10 @@ def validate_bundle(profile: Profile, items: list[LineItem]) -> list[Violation]:
             out.append(Violation(product_id=p.id, rule="quantity", message="Quantity must be at least 1"))
         out.extend(product_violations(profile, p))
         if p.requires_one_of and not ids.intersection(p.requires_one_of):
-            names = " or ".join(cat[d].name for d in p.requires_one_of if d in cat)
-            out.append(Violation(product_id=p.id, rule="dependency",
-                                 message=f"{p.name} needs one of these in the same bundle: {names}"))
+            deps = [cat[d] for d in p.requires_one_of if d in cat]
+            if all(d.category == "Connectivity" for d in deps):
+                msg = f"{p.name} needs an internet line in the same bundle"
+            else:
+                msg = f"{p.name} needs one of: " + ", ".join(d.name for d in deps)
+            out.append(Violation(product_id=p.id, rule="dependency", message=msg))
     return out

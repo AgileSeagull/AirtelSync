@@ -130,7 +130,9 @@ def _why(codes: list[str], segment: str) -> str:
             parts.append(REASON_TEXT[c])
         elif c.startswith("NEED_"):
             tag = c[5:].lower()
-            parts.append("You asked for: " + NEEDS.get(tag, tag).lower())
+            label = NEEDS.get(tag, tag)
+            label = label if label[:2].isupper() else label[0].lower() + label[1:]
+            parts.append("You asked for: " + label)
         elif c.startswith("SEG_"):
             parts.append(f"Popular with {SEGMENT_LABELS[segment].lower()}")
         elif c.startswith("DEP_FOR_"):

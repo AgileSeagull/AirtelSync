@@ -15,4 +15,4 @@ from app.main import app  # noqa: E402
 
 @pytest.fixture(scope="session")
 def client():
-    return TestClient(app)
+    return TestClient(app, base_url="http://testserver/api")
