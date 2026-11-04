@@ -31,6 +31,19 @@ class FulfilmentError(Exception):
     pass
 
 
+def _inr(n: int) -> str:
+    """Indian digit grouping: 1,23,456."""
+    s = str(abs(int(n)))
+    if len(s) > 3:
+        head, tail = s[:-3], s[-3:]
+        groups = []
+        while len(head) > 2:
+            groups.insert(0, head[-2:])
+            head = head[:-2]
+        s = ",".join(([head] if head else []) + groups + [tail])
+    return "₹" + s
+
+
 def _now() -> datetime:
     return datetime.now(timezone.utc)
 
@@ -70,7 +83,7 @@ def set_mandate(o: Order, upi_id: str) -> Order:
     o.mandate = {"upi_id_masked": upi_id[:2] + "•••@" + upi_id.split("@")[1], "max_amount": o.quote["monthly_total"],
                  "frequency": "monthly", "set_at": _iso(_now())}
     o.state = "MandateSet"
-    _event(o, "MandateSet", f"UPI AutoPay up to ₹{o.quote['monthly_total']}/month approved")
+    _event(o, "MandateSet", f"UPI AutoPay up to {_inr(o.quote['monthly_total'])}/month approved")
     notify.send(o, "MandateSet", _lang(o))
     o.save()
     return o
@@ -122,7 +135,7 @@ def reroute_to_airfiber(o: Order) -> None:
         o.quote = q.model_dump()
         diff = q.monthly_total - old_total
         note = (f"Fibre isn't available at your address yet, so we switched to {p.name} (installs in {p.install_days} days). "
-                f"New monthly price ₹{q.monthly_total} ({'−' if diff < 0 else '+'}₹{abs(diff)})."
+                f"New monthly price {_inr(q.monthly_total)} ({'−' if diff < 0 else '+'}{_inr(diff)})."
                 + (f" Removed (needs a fibre line): {', '.join(dropped)}." if dropped else ""))
     else:
         note = f"Fibre isn't available at your address yet, so we switched to {p.name}."

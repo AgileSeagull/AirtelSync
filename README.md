@@ -98,6 +98,18 @@ Demo sign-in by role (Accel staff / channel partner; header `X-Console-Role`).
   Apr–May and tested on June: AUC 0.70, top-decile activation 18.2% vs 7.4% base (2.45×), top 30% of leads hold
   54% of activations.
 
+## Business case deck
+
+`docs/deck/AirtelSync_Business_Case.pptx` (10 slides on the official SYNC template, with entrance animations and
+fade transitions; PDF copy alongside). Rebuild after changing numbers or screenshots:
+
+```bash
+pip install -r docs/deck/requirements.txt
+python docs/deck/build_deck.py "../Submission Template_Sync.pptx" docs/deck/AirtelSync_Business_Case.pptx
+```
+
+Slides use Montserrat (available in Google Slides; install it locally for PowerPoint).
+
 ## Run everything
 
 ```bash

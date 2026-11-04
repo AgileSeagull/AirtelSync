@@ -24,6 +24,9 @@ CITY_ALIASES = {
     "पटना": "Patna", "इंदौर": "Indore", "भोपाल": "Bhopal", "नागपुर": "Nagpur", "नासिक": "Nashik",
     "बेंगलुरु": "Bengaluru", "चेन्नई": "Chennai", "कोलकाता": "Kolkata", "हैदराबाद": "Hyderabad",
     "अहमदाबाद": "Ahmedabad", "सूरत": "Surat", "लुधियाना": "Ludhiana",
+    "कोच्चि": "Kochi", "कोचीन": "Kochi", "कोयंबटूर": "Coimbatore", "कोयम्बटूर": "Coimbatore", "मैसूर": "Mysuru",
+    "मैसूरु": "Mysuru", "वडोदरा": "Vadodara", "बड़ौदा": "Vadodara", "विशाखापत्तनम": "Visakhapatnam", "विज़ाग": "Visakhapatnam",
+    "बेंगलुरू": "Bengaluru", "बैंगलोर": "Bengaluru", "नई दिल्ली": "Delhi", "बंबई": "Mumbai",
 }
 
 # Tier-1 metros not in the data still resolve sensibly.

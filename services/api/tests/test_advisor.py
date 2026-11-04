@@ -33,6 +33,8 @@ def test_guard_allows_tool_numbers_and_blocks_invented_ones():
     ("we pay Rs 2,500 a month on mobile hotspot", "current_internet", "Mobile hotspot"),
     ("my gst is 32ttnxb7384t1zw", "gstin", "32TTNXB7384T1ZW"),
     ("in bombay", "city", "Mumbai"),
+    ("मेरा डेंटल क्लिनिक है कोच्चि में", "city", "Kochi"),
+    ("मेरा डेंटल क्लिनिक है कोच्चि में", "business_type", "Dental clinic"),
 ])
 def test_nlu_extracts(text, key, value):
     assert nlu.extract(text, None)[key] == value
