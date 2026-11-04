@@ -22,10 +22,23 @@ MAX_TOOL_ROUNDS = 6
 _client: anthropic.AsyncAnthropic | None = None
 
 
-def available() -> bool:
+def provider() -> str | None:
+    """Which LLM backs the advisor: UDYAM_LLM_PROVIDER if set, else whichever key is present
+    (Gemini first). None means scripted mode."""
     if os.getenv("UDYAM_ADVISOR_MODE", "").lower() == "scripted":
-        return False
-    return bool(os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_AUTH_TOKEN"))
+        return None
+    wanted = os.getenv("UDYAM_LLM_PROVIDER", "").lower()
+    has_gemini = bool(os.getenv("GEMINI_API_KEY"))
+    has_claude = bool(os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_AUTH_TOKEN"))
+    if wanted == "gemini":
+        return "gemini" if has_gemini else None
+    if wanted in ("anthropic", "claude"):
+        return "anthropic" if has_claude else None
+    return "gemini" if has_gemini else ("anthropic" if has_claude else None)
+
+
+def available() -> bool:
+    return provider() is not None
 
 
 def client() -> anthropic.AsyncAnthropic:
@@ -62,7 +75,17 @@ def _dump(content) -> list[dict]:
 
 
 async def respond(session: AdvisorSession, user_text: str) -> str:
-    """Run one owner turn. History is append-only (thinking blocks stay valid)."""
+    if provider() == "gemini":
+        from . import llm_gemini
+        try:
+            return await llm_gemini.respond(session, user_text)
+        except llm_gemini.GeminiUnavailable as e:
+            raise LLMUnavailable(str(e)) from e
+    return await respond_claude(session, user_text)
+
+
+async def respond_claude(session: AdvisorSession, user_text: str) -> str:
+    """Run one owner turn on Claude. History is append-only (thinking blocks stay valid)."""
     msgs = session.llm_messages
     if not msgs:
         msgs.append({"role": "user", "content": [{"type": "text", "text": f"[{LANG_NOTE.format(lang=LANGS.get(session.lang, 'English'))}]"},

@@ -27,7 +27,8 @@ class AdvisorSession(BaseModel):
     asked: list[str] = Field(default_factory=list)  # slots already asked (scripted mode)
     last_asked: str | None = None
     transcript: list[Turn] = Field(default_factory=list)  # what the owner saw
-    llm_messages: list[dict[str, Any]] = Field(default_factory=list)  # raw API history (append-only)
+    llm_messages: list[dict[str, Any]] = Field(default_factory=list)  # Claude API history (append-only)
+    gemini_contents: list[dict[str, Any]] = Field(default_factory=list)  # Gemini API history (append-only)
     recommendation: dict[str, Any] | None = None
     selected_tier: str | None = None
     handoff: dict[str, Any] | None = None

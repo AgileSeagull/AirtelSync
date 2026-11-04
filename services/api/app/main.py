@@ -1,4 +1,4 @@
-"""Udyam Digital API. All JSON routes live under /api; the built web app is served at /."""
+"""AirtelSync API (Project Udyam Digital). All JSON routes live under /api; the built web app is served at /."""
 from __future__ import annotations
 
 
@@ -16,7 +16,7 @@ from .kyc.api import router as kyc_router
 from .orders.api import router as orders_router
 from .mocks.registry import router as mock_router
 
-app = FastAPI(title="Udyam Digital API", version="0.3.0",
+app = FastAPI(title="AirtelSync API", version="0.3.0",
               description="Digital-first MSME acquisition and onboarding for Accel Business (hackathon prototype).")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 

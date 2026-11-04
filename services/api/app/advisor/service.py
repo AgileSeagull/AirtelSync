@@ -27,7 +27,7 @@ async def message(s: AdvisorSession, text: str) -> tuple[str, str]:
     if llm.available() and not s.llm_disabled:
         try:
             reply = await llm.respond(s, text)
-            mode = "llm"
+            mode = f"llm:{llm.provider()}"
         except llm.LLMUnavailable as e:
             log.warning("LLM unavailable for session %s, continuing scripted: %s", s.id, e)
             s.llm_disabled = True

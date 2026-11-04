@@ -1,6 +1,8 @@
-# Udyam Digital
+# AirtelSync
 
-Digital-first acquisition and onboarding for small businesses (Accel Business, YTL Hackathon 2026 – Enterprise Track A).
+**Project Udyam Digital** prototype (YTL Hackathon 2026, Enterprise Track A).
+
+Digital-first acquisition and onboarding for small businesses, built for the fictional operator Accel Business.
 A small-business owner chats with an advisor in their language, gets a bundle with one transparent monthly
 price, completes KYC in minutes, and tracks installation without calling support.
 
@@ -20,10 +22,12 @@ services/api/         FastAPI backend
 
 ## Advisor modes
 
-- **LLM mode** (Claude, `claude-opus-5-5` at low effort): set `ANTHROPIC_API_KEY` (see `services/api/.env.example`).
-  The model talks; tools (`lookup_gstin`, `update_profile`, `recommend_bundle`, `check_product`, `handoff_to_human`)
-  call the engine. An output guard rejects any rupee amount or product id not returned by a tool. Server-side
-  refusal fallback is enabled (`fallbacks: "default"`).
+- **LLM mode**: put `GEMINI_API_KEY` in `services/api/.env` (template: `.env.example`; the file is git-ignored and
+  loaded automatically). Default model `gemini-flash-latest` (override with `GEMINI_MODEL`). Claude is also
+  supported (`ANTHROPIC_API_KEY`, `claude-opus-5-5`); `UDYAM_LLM_PROVIDER` picks one when both keys are set.
+  The model talks; tools (`lookup_gstin`, `update_profile`, `recommend_bundle`, `check_product`,
+  `handoff_to_human`) call the engine. An output guard rejects any rupee amount or product id not returned by a
+  tool (one corrective retry, then fallback).
 - **Scripted mode** (no key needed): rule-based English/Hindi/Hinglish slot filling over the same tools. Also the
   automatic fallback if the LLM errors mid-session, so a live demo never dead-ends.
 

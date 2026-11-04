@@ -72,6 +72,7 @@ def text(t):
 @pytest.fixture
 def fake_llm(monkeypatch):
     monkeypatch.setenv("UDYAM_ADVISOR_MODE", "llm")
+    monkeypatch.setenv("UDYAM_LLM_PROVIDER", "anthropic")
     monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
     script: list = []
     sent: list = []
@@ -105,7 +106,7 @@ def test_llm_tool_loop_records_profile_and_recommends(fake_llm):
     ]
     s = service.start("en")
     reply, mode = asyncio.run(service.message(s, "Dental clinic in Kochi, 12 staff, need CCTV"))
-    assert mode == "llm"
+    assert mode == "llm:anthropic"
     assert s.recommendation and s.profile["city"] == "Kochi"
     assert "₹" in reply
     # History is append-only: each request's messages extend the previous one.
@@ -123,7 +124,7 @@ def test_llm_guard_retries_then_accepts(fake_llm):
     ]
     s = service.start("en")
     reply, mode = asyncio.run(service.message(s, "salon in pune, 3 people"))
-    assert mode == "llm" and "99/month" not in reply
+    assert mode == "llm:anthropic" and "99/month" not in reply
     assert any("Automated check" in str(m["content"]) for m in sent[-1] if m["role"] == "user")
 
 
@@ -168,3 +169,86 @@ def test_gstin_is_masked_in_session_view(client):
 def test_all_eval_scenarios_pass_in_scripted_mode():
     from evals.run_advisor_evals import main
     assert asyncio.run(main([])) == 0
+
+
+# ------------------------------------------------------------------ fake Gemini (real SDK response types)
+from google.genai import types as gtypes  # noqa: E402
+
+from app.advisor import llm_gemini  # noqa: E402
+
+
+def g_call(name, args, i):
+    return gtypes.GenerateContentResponse(candidates=[gtypes.Candidate(content=gtypes.Content(role="model", parts=[
+        gtypes.Part(function_call=gtypes.FunctionCall(name=name, args=args, id=f"c{i}"), thought_signature=b"sig")]))])
+
+
+def g_text(t):
+    return gtypes.GenerateContentResponse(candidates=[gtypes.Candidate(content=gtypes.Content(role="model", parts=[gtypes.Part(text=t)]))])
+
+
+@pytest.fixture
+def fake_gemini(monkeypatch):
+    monkeypatch.setenv("UDYAM_ADVISOR_MODE", "llm")
+    monkeypatch.setenv("UDYAM_LLM_PROVIDER", "gemini")
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    script, sent = [], []
+
+    async def fake_generate(contents):
+        sent.append([c.model_dump(mode="json", exclude_none=True) for c in contents])
+        step = script.pop(0)
+        return step(sent[-1]) if callable(step) else step
+
+    monkeypatch.setattr(llm_gemini, "_generate", fake_generate)
+    return script, sent
+
+
+def _gemini_price(contents):
+    for c in reversed(contents):
+        for p in c.get("parts", []):
+            fr = p.get("function_response")
+            if fr and "tiers" in (fr.get("response") or {}).get("result", {}):
+                return fr["response"]["result"]["tiers"][1]["monthly_total_incl_gst"]
+    raise AssertionError("no recommendation")
+
+
+def test_gemini_tool_loop_and_signature_round_trip(fake_gemini):
+    script, sent = fake_gemini
+    script += [
+        g_call("update_profile", {"business_type": "Dental clinic", "city": "Kochi", "employees": 12}, 1),
+        g_call("recommend_bundle", {}, 2),
+        lambda c: g_text(f"Recommended plan: ₹{_gemini_price(c):,}/month incl. GST."),
+    ]
+    s = service.start("en")
+    reply, mode = asyncio.run(service.message(s, "dental clinic in kochi, 12 staff"))
+    assert mode == "llm:gemini" and s.recommendation and "₹" in reply
+    # the model's thought signature is sent back unchanged, and history is append-only
+    assert sent[1][1]["parts"][0]["thought_signature"] == sent[2][1]["parts"][0]["thought_signature"]
+    for a, b in zip(sent, sent[1:]):
+        assert b[: len(a)] == a
+    fr = sent[1][2]["parts"][0]["function_response"]
+    assert fr["id"] == "c1" and fr["name"] == "update_profile"
+
+
+def test_gemini_guard_and_tool_error(fake_gemini):
+    script, sent = fake_gemini
+    script += [
+        g_call("recommend_bundle", {}, 1),  # fails: profile incomplete → error returned to model
+        g_call("update_profile", {"business_type": "Salon", "city": "Pune", "employees": 3}, 2),
+        g_call("recommend_bundle", {}, 3),
+        g_text("Only ₹99/month!"),
+        lambda c: g_text(f"It is ₹{_gemini_price(c):,}/month."),
+    ]
+    s = service.start("en")
+    reply, mode = asyncio.run(service.message(s, "salon pune 3 people"))
+    assert "error" in sent[1][-1]["parts"][0]["function_response"]["response"]
+    assert mode == "llm:gemini" and "99/month" not in reply
+
+
+def test_gemini_failure_falls_back(fake_gemini, monkeypatch):
+    async def boom(contents):
+        raise llm_gemini.GeminiUnavailable("quota")
+
+    monkeypatch.setattr(llm_gemini, "_generate", boom)
+    s = service.start("en")
+    reply, mode = asyncio.run(service.message(s, "kirana store in Patna"))
+    assert mode == "scripted" and s.llm_disabled
