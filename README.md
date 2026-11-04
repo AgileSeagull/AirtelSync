@@ -77,6 +77,23 @@ sandbox (adapter not tested without credentials). The tracker polls every 5 s; a
 the back office (next step, fibre not available, install delay). Activated orders show a referral card
 (referrals convert at 14.8%, the best channel in the data).
 
+## Sales & partner console (`/#/console`)
+
+Demo sign-in by role (Accel staff / channel partner; header `X-Console-Role`).
+
+- **Leads to call**: advisor conversations that did not convert, scored and ranked by P(activation) × monthly
+  value, with the top three drivers, where the owner stopped, and routing (field sales for multi-site/manufacturers
+  or ≥ ₹25k/month, channel partner for tier-2 micro, inside sales otherwise). Partners only see their leads.
+  Identifiers typed into chat are masked.
+- **Assisted mode**: "Offer help" sends the owner a one-time code; only when the owner shares it can the
+  partner continue the owner's own journey (same rules, same prices). Every step is audit-logged.
+- **Re-engage Q2**: 3,026 Q2 leads lost before a needs assessment, best first, with a suggested channel
+  (WhatsApp link to the self-serve advisor where the loss was "no time for a visit" or "unreachable").
+- **KYC reviews**: specialist approve/reject with a mandatory, audit-logged reason (staff only).
+- **Lead score model**: logistic regression on facts known when a lead arrives (no outcome leakage), trained on
+  Apr–May and tested on June: AUC 0.70, top-decile activation 18.2% vs 7.4% base (2.45×), top 30% of leads hold
+  54% of activations.
+
 ## Run everything
 
 ```bash
@@ -114,7 +131,7 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 | 3 | Owner web app: chat, quote & checkout with toggles | done |
 | 4 | Smart KYC: consent, OCR, layered checks, verdicts | done |
 | 5 | Order tracker: state machine, ETAs, notifications | done |
-| 6 | Back office: lead console, propensity score | |
+| 6 | Back office: lead console, propensity score | done |
 
 ## Key engine facts (tested)
 

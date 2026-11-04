@@ -27,6 +27,7 @@ export function Welcome({ lang, setLang, onStart, busy, tr }: {
       </div>
       <button className="btn primary block" onClick={onStart} disabled={busy}>{tr("start")} →</button>
       <a className="btn link center" href="#/kyc-demo">Try Smart KYC with sample applicants →</a>
+      <a className="btn link center" href="#/console">Sales &amp; partner console →</a>
       <p className="muted small center" style={{ margin: 0 }}>
         Accel Business · prototype for YTL Hackathon 2026. All data is synthetic.
       </p>

@@ -85,7 +85,7 @@ def to_profile(profile: dict[str, Any]) -> Profile:
 
 def public_view(profile: dict[str, Any]) -> dict[str, Any]:
     """Profile as shown in the UI/console: identifiers masked."""
-    out = dict(profile)
+    out = {k: v for k, v in profile.items() if not k.startswith("_")}
     if out.get("gstin"):
         out["gstin"] = gstin_ids.mask(out["gstin"])
     return out

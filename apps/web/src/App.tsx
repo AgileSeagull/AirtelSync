@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { api, type Lang, type SessionView, type Tier } from "./api";
 import { Chat } from "./components/Chat";
+import { Console } from "./components/Console";
 import { Kyc } from "./components/Kyc";
 import { OrderPlaced } from "./components/OrderPlaced";
 import { QuoteBuilder } from "./components/QuoteBuilder";
@@ -14,7 +15,8 @@ type Route =
   | { name: "quote"; sid: string; tier: Tier["tier"] }
   | { name: "order"; oid: string }
   | { name: "kyc"; oid: string | null }
-  | { name: "track"; oid: string };
+  | { name: "track"; oid: string }
+  | { name: "console" };
 
 function parse(hash: string): Route {
   const [, a, b, c] = hash.replace(/^#/, "").split("/");
@@ -24,6 +26,7 @@ function parse(hash: string): Route {
   if (a === "kyc" && b) return { name: "kyc", oid: b };
   if (a === "kyc-demo") return { name: "kyc", oid: null };
   if (a === "track" && b) return { name: "track", oid: b };
+  if (a === "console") return { name: "console" };
   return { name: "welcome" };
 }
 
@@ -72,6 +75,8 @@ export default function App() {
   }, [lang]);
 
   const restart = () => { setSession(null); go("/"); };
+
+  if (route.name === "console") return <Console />;
 
   let body = null;
   let title = "Accel Udyam";

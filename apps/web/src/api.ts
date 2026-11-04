@@ -164,6 +164,25 @@ export function fmtDate(iso: string | null, lang: Lang, withTime = false): strin
   return d.toLocaleString(lang === "hi" ? "hi-IN" : "en-IN", opts);
 }
 
+// ------------------------------------------------------------------ console
+export type Role = "sales" | "partner";
+async function ccall<T>(role: Role, path: string, init?: RequestInit): Promise<T> {
+  return call<T>(path, { ...init, headers: { "X-Console-Role": role, ...(init?.headers || {}) } });
+}
+export interface Driver { factor: string; effect: "up" | "down"; weight: number }
+export const consoleApi = {
+  summary: (r: Role) => ccall<any>(r, "/console/summary"),
+  leads: (r: Role) => ccall<any[]>(r, "/console/leads"),
+  reengage: (r: Role) => ccall<any>(r, "/console/reengage?limit=25"),
+  model: (r: Role) => ccall<any>(r, "/console/model"),
+  reviews: (r: Role) => ccall<any[]>(r, "/console/kyc-reviews"),
+  decide: (r: Role, id: string, decision: string, note: string) =>
+    ccall<any>(r, `/console/kyc-reviews/${id}`, { method: "POST", body: JSON.stringify({ decision, note }) }),
+  assist: (r: Role, sid: string) => ccall<{ demo_code: string }>(r, `/console/leads/${sid}/assist`, { method: "POST" }),
+  assistConfirm: (r: Role, sid: string, code: string, partner: string) =>
+    ccall<{ continue_url: string }>(r, `/console/leads/${sid}/assist/confirm`, { method: "POST", body: JSON.stringify({ code, partner }) }),
+};
+
 // Indian digit grouping: 1,23,456
 export function inr(n: number): string {
   return "₹" + Math.round(n).toLocaleString("en-IN");
