@@ -1,4 +1,4 @@
-"""Build the 7-slide AirtelSync submission deck on the official SYNC template.
+"""Build the AirtelSync submission deck (cover + 7 slides) on the official SYNC template.
 
     python docs/deck/build_submission.py "path/to/Submission Template_Sync.pptx" docs/deck/AirtelSync_Submission_7_Slides.pptx
 
@@ -19,7 +19,7 @@ from pptx.util import Inches
 sys.path.insert(0, str(Path(__file__).parent))
 from build_deck import (AMBER, AMBER_SOFT, BLUE, BLUE_SOFT, GREEN, GREEN_SOFT, GREY, INK, LINE, MUTED, PANEL,  # noqa: E402
                         RED, RED_SOFT, WHITE, Slide, apply_motion, arrow, box, footer, group, header, label_in,
-                        partners, phone, stagger, text)
+                        metrics, partners, phone, rollout, stagger, text)
 
 HERE = Path(__file__).parent
 REPO = "https://github.com/AgileSeagull/AirtelSync"
@@ -35,12 +35,13 @@ def cover(prs, blob):
                  size=11.5, color=RGBColor(0xEE, 0xEE, 0xEE), spacing=1.15), "rise", next(g), 700)
     sl.anim(box(sl, 0.65, 3.97, 0.5, 0.04, fill=RED, radius=0), "wipe", next(g), 500)
     light = RGBColor(0xC8, 0xC8, 0xC8)
-    tb = text(sl, 0.65, 4.1, 4.4, 0.7, [
-        [("Project Udyam Digital  ·  Enterprise Track A  ·  Team AirtelSync", {"bold": True})],
+    tb = text(sl, 0.65, 4.1, 4.4, 0.9, [
+        [("Team CTRL ALT ELITE", {"bold": True, "color": WHITE, "size": 10})],
+        [("Vishal Dev Verma  ·  Kartik Patel", {})],
         [("▶  Watch the demo video (2:52)", {"bold": True, "color": WHITE})],
         [("Code: github.com/AgileSeagull/AirtelSync", {})]], size=8.5, color=light, spacing=1.25)
-    for i, url in ((1, VIDEO), (2, REPO)):  # transparent click areas keep the text white (text links render blue)
-        hot = sl.s.shapes.add_shape(1, Inches(0.6), Inches(4.1 + i * 0.185), Inches(3.2), Inches(0.19))
+    for i, url in ((2, VIDEO), (3, REPO)):  # transparent click areas keep the text white (text links render blue)
+        hot = sl.s.shapes.add_shape(1, Inches(0.6), Inches(4.12 + i * 0.185), Inches(3.2), Inches(0.19))
         hot.fill.background()
         hot.line.fill.background()
         hot.click_action.hyperlink.address = url
@@ -249,56 +250,6 @@ def architecture(prs, blob):
     return sl
 
 
-# ------------------------------------------------------------------ 7 · metrics + rollout + risks
-def metrics_rollout(prs, blob):
-    sl = Slide(prs, blob)
-    header(sl, "Success metrics, rollout & risks (Q5)", "Five numbers, an 8-week pilot, risks already mitigated")
-    text(sl, 0.55, 1.55, 2.5, 0.2, "METRIC", size=6.5, bold=True, color=MUTED)
-    text(sl, 2.85, 1.55, 1.0, 0.2, "Q2 BASELINE", size=6.5, bold=True, color=MUTED)
-    text(sl, 3.85, 1.55, 1.0, 0.2, "6-MO TARGET", size=6.5, bold=True, color=MUTED)
-    rows = [("Lead → activation", "7.4%", "15%"), ("Lead → activation time", "17.6 days", "≤ 7 days"),
-            ("Cost per activation", "₹15,053", "≤ ₹5,000"), ("Status-chase calls / customer", "3.0", "≤ 0.5"), ("6-month churn", "15.2%", "≤ 10%")]
-    d = stagger(450, 120)
-    y = 1.76
-    for m, base, tgt in rows:
-        g = group(sl)
-        box(sl, 0.55, y, 4.3, 0.34, fill=WHITE, line=LINE, radius=0.25, container=g)
-        text(sl, 0.67, y + 0.08, 2.2, 0.2, m, size=8.5, bold=True, container=g)
-        text(sl, 2.85, y + 0.08, 1.0, 0.2, base, size=8.5, color=GREY, container=g)
-        text(sl, 3.85, y + 0.07, 1.0, 0.2, tgt, size=9.5, bold=True, color=RED, container=g)
-        sl.anim(g, "rise", next(d), 450)
-        y += 0.39
-    text(sl, 5.1, 1.55, 3, 0.2, "ROLLOUT", size=6.5, bold=True, color=MUTED)
-    phases = [("Weeks 0–8 · Pilot", "Pune + Kochi · offices and micro retail · web + WhatsApp · 2 partner networks"),
-              ("Months 3–6 · Scale", "10 cities · voice in 6 languages · live GSTN, Udyam, DigiLocker, UPI AutoPay"),
-              ("Months 6–12 · National", "All tier-1/2 cities · partner app · field-assisted multi-site and manufacturing")]
-    d = stagger(800, 180)
-    for i, (h, s) in enumerate(phases):
-        b = box(sl, 5.1, 1.76 + i * 0.66, 4.35, 0.58, fill=RED if i == 0 else WHITE, line=None if i == 0 else LINE, radius=0.14)
-        label_in(b, [[(h, {"bold": True, "size": 9, "color": WHITE if i == 0 else INK})],
-                     [(s, {"size": 7, "color": WHITE if i == 0 else GREY})]], align=PP_ALIGN.LEFT)
-        b.text_frame.margin_left = Inches(0.14)
-        sl.anim(b, "rise", next(d), 450)
-    text(sl, 0.55, 3.8, 6, 0.2, "RISKS, AND THE MITIGATION ALREADY IN THE PROTOTYPE", size=6.5, bold=True, color=MUTED)
-    risks = [("Wrong AI advice", "Rules decide eligibility and price; output guard; rule-based fallback"),
-             ("Forged documents", "Registry check on every number, cross-document matching, specialist review"),
-             ("Privacy (DPDP 2023)", "Purpose-wise consent, minimal data, photos deleted after decision"),
-             ("Channel conflict", "Partners paid on activation; assisted mode on the owner's own journey"),
-             ("Install delays, no fibre", "Feasibility before payment, switch to 5G AirFiber, SLA alerts")]
-    d = stagger(1400, 120)
-    for i, (r, m) in enumerate(risks):
-        b = box(sl, 0.55 + i * 1.8, 4.02, 1.7, 1.03, fill=WHITE, line=LINE, radius=0.1)
-        label_in(b, [[(r, {"bold": True, "size": 8.5, "color": INK})], [(m, {"size": 7, "color": GREY})]],
-                 align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.TOP)
-        b.text_frame.margin_left = Inches(0.12)
-        b.text_frame.margin_top = Inches(0.08)
-        sl.anim(b, "rise", next(d), 450)
-    footer(sl, "Ask: approve an 8-week, two-city pilot with one inside-sales pod and two partner networks, measured on these five metrics.")
-    sl.notes("Targets are deliberately conservative. Micro retail pays back in about 2 months instead of 8 once acquisition is digital, and the rules engine "
-             "plus KYC block the 49 ineligible items and 22 cancelled or suspended GSTIN activations seen in Q2.")
-    return sl
-
-
 def main(template: str, out: str) -> None:
     prs = Presentation(template)
     blobs = []
@@ -310,7 +261,7 @@ def main(template: str, out: str) -> None:
     for sldId in list(sldIdLst):
         prs.part.drop_rel(sldId.rId)
         sldIdLst.remove(sldId)
-    builders = [cover, problem_and_target, solution, kyc, partners, architecture, metrics_rollout]
+    builders = [cover, problem_and_target, solution, kyc, partners, architecture, metrics, rollout]
     for i, b in enumerate(builders):
         sl = b(prs, cover_bg if i == 0 else content_bg)
         apply_motion(sl)
