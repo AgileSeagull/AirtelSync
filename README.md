@@ -22,7 +22,7 @@ Built for *Accel Business*, the case's fictional telecom operator serving India'
 |---|---|
 | Working prototype | This repo — [run it in 3 commands](#run-it) |
 | Demo video (≤ 3 min) | [Watch on Google Drive](https://drive.google.com/file/d/1-a3ST8SOD1w0_sS1sOaOeT6owczay4UK/view?usp=sharing) |
-| Business case (10 slides) | [AirtelSync_Business_Case.pdf](docs/deck/AirtelSync_Business_Case.pdf) · [.pptx](docs/deck/AirtelSync_Business_Case.pptx) |
+| Business case (10 slides) | [AirtelSync_Business_Case.pdf](docs/deck/AirtelSync_Business_Case.pdf) |
 | Solution architecture | [AirtelSync_Solution_Architecture.pdf](docs/architecture/AirtelSync_Solution_Architecture.pdf) |
 | Privacy & security note | [AirtelSync_Privacy_Security_Note.pdf](docs/privacy/AirtelSync_Privacy_Security_Note.pdf) |
 
