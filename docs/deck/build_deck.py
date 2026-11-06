@@ -250,7 +250,7 @@ def cover(prs, blob):
     sl.anim(box(sl, 0.65, 4.12, 0.5, 0.04, fill=RED, radius=0), "wipe", next(g), 500)
     sl.anim(text(sl, 0.65, 4.25, 4.2, 0.45, [
         [("Project Udyam Digital  ·  Enterprise Track A", {"bold": True})],
-        "Business case · Team CTRL ALT ELITE · github.com/AgileSeagull/UdyamSaathi"], size=8.5, color=RGBColor(0xC8, 0xC8, 0xC8)),
+        "Business case · Team CTRL ALT ELITE · github.com/AgileSeagull/AirtelSync"], size=8.5, color=RGBColor(0xC8, 0xC8, 0xC8)),
         "fade", next(g), 600)
     sl.notes("Udyam Saathi: a working digital-first acquisition and onboarding journey for Accel Business's MSME customers. "
              "Everything in this deck is backed by the synthetic case data and the running prototype.")
@@ -556,7 +556,7 @@ def architecture(prs, blob):
     q = box(sl, 0.55, 4.48, 8.9, 0.56, fill=WHITE, line=LINE, radius=0.14)
     label_in(q, [[("Tested  ", {"bold": True, "color": RED}),
                   ("112 automated tests · 30 advisor conversations · 12/12 KYC applicants · 4 end-to-end browser journeys · "
-                   "code: github.com/AgileSeagull/UdyamSaathi", {})]], size=8, align=PP_ALIGN.LEFT)
+                   "code: github.com/AgileSeagull/AirtelSync", {})]], size=8, align=PP_ALIGN.LEFT)
     q.text_frame.margin_left = Inches(0.16)
     sl.anim(q, "rise", 1800, 500)
     footer(sl, "Government and payment integrations are mocks behind the interfaces a production adapter would implement.")

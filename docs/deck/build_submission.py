@@ -22,7 +22,7 @@ from build_deck import (AMBER, AMBER_SOFT, BLUE, BLUE_SOFT, GREEN, GREEN_SOFT, G
                         metrics, partners, phone, rollout, stagger, text)
 
 HERE = Path(__file__).parent
-REPO = "https://github.com/AgileSeagull/UdyamSaathi"
+REPO = "https://github.com/AgileSeagull/AirtelSync"
 VIDEO = "https://drive.google.com/file/d/1w1bql5tn_JVBzBwIGaljY0U5yy1IlhZ3/view?usp=sharing"
 
 
@@ -40,7 +40,7 @@ def cover(prs, blob):
         [("Vishal Dev Verma  ·  Kartik Patel", {})],
         [("Vellore Institute of Technology", {})],
         [("▶  Watch the demo video (2:52)", {"bold": True, "color": WHITE})],
-        [("Code: github.com/AgileSeagull/UdyamSaathi", {})]], size=8.5, color=light, spacing=1.25)
+        [("Code: github.com/AgileSeagull/AirtelSync", {})]], size=8.5, color=light, spacing=1.25)
     for i, url in ((3, VIDEO), (4, REPO)):  # transparent click areas keep the text white (text links render blue)
         hot = sl.s.shapes.add_shape(1, Inches(0.6), Inches(4.12 + i * 0.185), Inches(3.2), Inches(0.19))
         hot.fill.background()
