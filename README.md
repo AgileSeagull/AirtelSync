@@ -5,7 +5,7 @@
 Prototype for **Project Udyam Digital** · YTL Hackathon 2026 · Enterprise Track A.
 Built for *Accel Business*, the case's fictional telecom operator serving India's small businesses (MSMEs).
 
-▶ **[Watch the 3-minute demo](https://drive.google.com/file/d/1-a3ST8SOD1w0_sS1sOaOeT6owczay4UK/view?usp=sharing)**
+▶ **[Watch the 3-minute demo](https://drive.google.com/file/d/1w1bql5tn_JVBzBwIGaljY0U5yy1IlhZ3/view?usp=sharing)**
 
 <table>
   <tr>
@@ -21,7 +21,7 @@ Built for *Accel Business*, the case's fictional telecom operator serving India'
 | Deliverable | Where |
 |---|---|
 | Working prototype | This repo — [run it in 3 commands](#run-it) |
-| Demo video (≤ 3 min) | [Watch on Google Drive](https://drive.google.com/file/d/1-a3ST8SOD1w0_sS1sOaOeT6owczay4UK/view?usp=sharing) |
+| Demo video (≤ 3 min) | [Watch on Google Drive](https://drive.google.com/file/d/1w1bql5tn_JVBzBwIGaljY0U5yy1IlhZ3/view?usp=sharing) |
 | Business case (10 slides) | [UdyamSaathi_Business_Case.pdf](docs/deck/UdyamSaathi_Business_Case.pdf) |
 | Solution architecture | [UdyamSaathi_Solution_Architecture.pdf](docs/architecture/UdyamSaathi_Solution_Architecture.pdf) |
 | Privacy & security note | [UdyamSaathi_Privacy_Security_Note.pdf](docs/privacy/UdyamSaathi_Privacy_Security_Note.pdf) |

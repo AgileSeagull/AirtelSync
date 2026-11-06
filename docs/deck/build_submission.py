@@ -23,7 +23,7 @@ from build_deck import (AMBER, AMBER_SOFT, BLUE, BLUE_SOFT, GREEN, GREEN_SOFT, G
 
 HERE = Path(__file__).parent
 REPO = "https://github.com/AgileSeagull/UdyamSaathi"
-VIDEO = "https://drive.google.com/file/d/1-a3ST8SOD1w0_sS1sOaOeT6owczay4UK/view?usp=sharing"
+VIDEO = "https://drive.google.com/file/d/1w1bql5tn_JVBzBwIGaljY0U5yy1IlhZ3/view?usp=sharing"
 
 
 # ------------------------------------------------------------------ 1 · cover
