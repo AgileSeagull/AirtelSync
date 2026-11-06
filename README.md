@@ -5,6 +5,8 @@
 Prototype for **Project Udyam Digital** · YTL Hackathon 2026 · Enterprise Track A.
 Built for *Accel Business*, the case's fictional telecom operator serving India's small businesses (MSMEs).
 
+▶ **[Watch the 3-minute demo](https://drive.google.com/file/d/1-a3ST8SOD1w0_sS1sOaOeT6owczay4UK/view?usp=sharing)**
+
 <table>
   <tr>
     <td align="center"><img src="docs/deck/img/s1-chat.png" width="180" alt="Advisor chat in Hindi"><br><sub><b>1 · Chat</b><br>AI advisor, any language</sub></td>
@@ -19,7 +21,7 @@ Built for *Accel Business*, the case's fictional telecom operator serving India'
 | Deliverable | Where |
 |---|---|
 | Working prototype | This repo — [run it in 3 commands](#run-it) |
-| Demo video (≤ 3 min) | *Coming soon* |
+| Demo video (≤ 3 min) | [Watch on Google Drive](https://drive.google.com/file/d/1-a3ST8SOD1w0_sS1sOaOeT6owczay4UK/view?usp=sharing) |
 | Business case (10 slides) | [AirtelSync_Business_Case.pdf](docs/deck/AirtelSync_Business_Case.pdf) · [.pptx](docs/deck/AirtelSync_Business_Case.pptx) |
 | Solution architecture | [AirtelSync_Solution_Architecture.pdf](docs/architecture/AirtelSync_Solution_Architecture.pdf) |
 | Privacy & security note | [AirtelSync_Privacy_Security_Note.pdf](docs/privacy/AirtelSync_Privacy_Security_Note.pdf) |
@@ -246,8 +248,3 @@ services/api/.venv/bin/python docs/privacy/render.py
 Government registries, DigiLocker, Aadhaar e-Sign and UPI AutoPay are mocks built from the case data. The console
 uses a demo sign-in, and data lives in a local SQLite file. "Today" is fixed at **2026-07-15** to match the case
 data. The [privacy note](docs/privacy/AirtelSync_Privacy_Security_Note.pdf) lists what production would add.
-
----
-
-Built by **Vishal** ([@AgileSeagull](https://github.com/AgileSeagull)) for the YTL Hackathon 2026.
-Accel Business is a fictional operator; all data is synthetic.
