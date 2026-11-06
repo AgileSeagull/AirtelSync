@@ -13,5 +13,5 @@ with sync_playwright() as p:
     over = pg.evaluate("document.body.scrollHeight > 1123 || document.body.scrollWidth > 1587")
     print("overflow:", over, pg.evaluate("[document.body.scrollWidth, document.body.scrollHeight]"))
     pg.screenshot(path=str(HERE / "architecture_preview.png"))
-    pg.pdf(path=str(HERE / "AirtelSync_Solution_Architecture.pdf"), width="420mm", height="297mm", print_background=True)
+    pg.pdf(path=str(HERE / "UdyamSaathi_Solution_Architecture.pdf"), width="420mm", height="297mm", print_background=True)
     b.close()

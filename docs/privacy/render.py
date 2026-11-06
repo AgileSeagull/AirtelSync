@@ -13,5 +13,5 @@ with sync_playwright() as p:
     print("content bottom:", pg.evaluate("Math.max(...[...document.querySelectorAll('section')].map(e => e.getBoundingClientRect().bottom))"),
           "footer top:", pg.evaluate("document.querySelector('footer').getBoundingClientRect().top"))
     pg.screenshot(path=str(HERE / "privacy_note_preview.png"))
-    pg.pdf(path=str(HERE / "AirtelSync_Privacy_Security_Note.pdf"), width="210mm", height="297mm", print_background=True)
+    pg.pdf(path=str(HERE / "UdyamSaathi_Privacy_Security_Note.pdf"), width="210mm", height="297mm", print_background=True)
     b.close()

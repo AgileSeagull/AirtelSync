@@ -1,6 +1,6 @@
-"""Build the AirtelSync submission deck (cover + 7 slides) on the official SYNC template.
+"""Build the Udyam Saathi submission deck (cover + 7 slides) on the official SYNC template.
 
-    python docs/deck/build_submission.py "path/to/Submission Template_Sync.pptx" docs/deck/AirtelSync_Submission_7_Slides.pptx
+    python docs/deck/build_submission.py "path/to/Submission Template_Sync.pptx" docs/deck/UdyamSaathi_Submission_7_Slides.pptx
 
 Condensed from the 10-slide business case (build_deck.py, whose helpers and slides it reuses):
 problem + target customers, solution + pricing, Smart KYC + privacy, field force & partners,
@@ -22,7 +22,7 @@ from build_deck import (AMBER, AMBER_SOFT, BLUE, BLUE_SOFT, GREEN, GREEN_SOFT, G
                         metrics, partners, phone, rollout, stagger, text)
 
 HERE = Path(__file__).parent
-REPO = "https://github.com/AgileSeagull/AirtelSync"
+REPO = "https://github.com/AgileSeagull/UdyamSaathi"
 VIDEO = "https://drive.google.com/file/d/1-a3ST8SOD1w0_sS1sOaOeT6owczay4UK/view?usp=sharing"
 
 
@@ -30,7 +30,7 @@ VIDEO = "https://drive.google.com/file/d/1-a3ST8SOD1w0_sS1sOaOeT6owczay4UK/view?
 def cover(prs, blob):
     sl = Slide(prs, blob)
     g = stagger(300, 250)
-    sl.anim(text(sl, 0.65, 2.6, 4.4, 0.55, "AirtelSync", size=34, bold=True, color=WHITE), "rise", next(g), 700)
+    sl.anim(text(sl, 0.65, 2.6, 4.4, 0.55, "Udyam Saathi", size=34, bold=True, color=WHITE), "rise", next(g), 700)
     sl.anim(text(sl, 0.65, 3.23, 4.3, 0.6, "Small businesses go digital in one sitting: advice, quote, KYC and activation on a phone, in their language.",
                  size=11.5, color=RGBColor(0xEE, 0xEE, 0xEE), spacing=1.15), "rise", next(g), 700)
     sl.anim(box(sl, 0.65, 3.97, 0.5, 0.04, fill=RED, radius=0), "wipe", next(g), 500)
@@ -40,14 +40,14 @@ def cover(prs, blob):
         [("Vishal Dev Verma  ·  Kartik Patel", {})],
         [("Vellore Institute of Technology", {})],
         [("▶  Watch the demo video (2:52)", {"bold": True, "color": WHITE})],
-        [("Code: github.com/AgileSeagull/AirtelSync", {})]], size=8.5, color=light, spacing=1.25)
+        [("Code: github.com/AgileSeagull/UdyamSaathi", {})]], size=8.5, color=light, spacing=1.25)
     for i, url in ((3, VIDEO), (4, REPO)):  # transparent click areas keep the text white (text links render blue)
         hot = sl.s.shapes.add_shape(1, Inches(0.6), Inches(4.12 + i * 0.185), Inches(3.2), Inches(0.19))
         hot.fill.background()
         hot.line.fill.background()
         hot.click_action.hyperlink.address = url
     sl.anim(tb, "fade", next(g), 600)
-    sl.notes("AirtelSync: a working digital-first acquisition and onboarding journey for Accel Business's MSME customers. "
+    sl.notes("Udyam Saathi: a working digital-first acquisition and onboarding journey for Accel Business's MSME customers. "
              "The demo video and the code repository are linked on this slide; every figure is backed by the case data and the running prototype.")
     return sl
 
@@ -272,4 +272,4 @@ def main(template: str, out: str) -> None:
 
 if __name__ == "__main__":
     main(sys.argv[1] if len(sys.argv) > 1 else str(HERE.parents[2] / "Submission Template_Sync.pptx"),
-         sys.argv[2] if len(sys.argv) > 2 else str(HERE / "AirtelSync_Submission_7_Slides.pptx"))
+         sys.argv[2] if len(sys.argv) > 2 else str(HERE / "UdyamSaathi_Submission_7_Slides.pptx"))

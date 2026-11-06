@@ -1,4 +1,4 @@
-// Typed client for the AirtelSync API.
+// Typed client for the Udyam Saathi API.
 
 export type Lang = "en" | "hi" | "mr" | "ta" | "te" | "kn" | "gu" | "bn" | "pa" | "ml";
 

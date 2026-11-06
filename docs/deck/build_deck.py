@@ -1,7 +1,7 @@
-"""Build the 10-slide AirtelSync business case on the official SYNC submission template.
+"""Build the 10-slide Udyam Saathi business case on the official SYNC submission template.
 
     pip install -r docs/deck/requirements.txt
-    python docs/deck/build_deck.py "path/to/Submission Template_Sync.pptx" docs/deck/AirtelSync_Business_Case.pptx
+    python docs/deck/build_deck.py "path/to/Submission Template_Sync.pptx" docs/deck/UdyamSaathi_Business_Case.pptx
 
 Every figure on the slides comes from smb_leads.csv / the mock registries / the prototype's
 test results (see notes on each slide). Animations are native PowerPoint entrance effects
@@ -244,15 +244,15 @@ def stagger(start, step):
 def cover(prs, blob):
     sl = Slide(prs, blob)
     g = stagger(300, 250)
-    sl.anim(text(sl, 0.65, 2.75, 4.2, 0.55, "AirtelSync", size=34, bold=True, color=WHITE), "rise", next(g), 700)
+    sl.anim(text(sl, 0.65, 2.75, 4.2, 0.55, "Udyam Saathi", size=34, bold=True, color=WHITE), "rise", next(g), 700)
     sl.anim(text(sl, 0.65, 3.38, 4.2, 0.6, "Small businesses go digital in one sitting: advice, quote, KYC and activation on a phone, in their language.",
                  size=11.5, color=RGBColor(0xEE, 0xEE, 0xEE), spacing=1.15), "rise", next(g), 700)
     sl.anim(box(sl, 0.65, 4.12, 0.5, 0.04, fill=RED, radius=0), "wipe", next(g), 500)
     sl.anim(text(sl, 0.65, 4.25, 4.2, 0.45, [
         [("Project Udyam Digital  ·  Enterprise Track A", {"bold": True})],
-        "Business case · Team AirtelSync · github.com/AgileSeagull/AirtelSync"], size=8.5, color=RGBColor(0xC8, 0xC8, 0xC8)),
+        "Business case · Team CTRL ALT ELITE · github.com/AgileSeagull/UdyamSaathi"], size=8.5, color=RGBColor(0xC8, 0xC8, 0xC8)),
         "fade", next(g), 600)
-    sl.notes("AirtelSync: a working digital-first acquisition and onboarding journey for Accel Business's MSME customers. "
+    sl.notes("Udyam Saathi: a working digital-first acquisition and onboarding journey for Accel Business's MSME customers. "
              "Everything in this deck is backed by the synthetic case data and the running prototype.")
     return sl
 
@@ -556,7 +556,7 @@ def architecture(prs, blob):
     q = box(sl, 0.55, 4.48, 8.9, 0.56, fill=WHITE, line=LINE, radius=0.14)
     label_in(q, [[("Tested  ", {"bold": True, "color": RED}),
                   ("112 automated tests · 30 advisor conversations · 12/12 KYC applicants · 4 end-to-end browser journeys · "
-                   "code: github.com/AgileSeagull/AirtelSync", {})]], size=8, align=PP_ALIGN.LEFT)
+                   "code: github.com/AgileSeagull/UdyamSaathi", {})]], size=8, align=PP_ALIGN.LEFT)
     q.text_frame.margin_left = Inches(0.16)
     sl.anim(q, "rise", 1800, 500)
     footer(sl, "Government and payment integrations are mocks behind the interfaces a production adapter would implement.")
@@ -664,4 +664,4 @@ def main(template: str, out: str) -> None:
 
 if __name__ == "__main__":
     main(sys.argv[1] if len(sys.argv) > 1 else str(HERE.parents[2] / "Submission Template_Sync.pptx"),
-         sys.argv[2] if len(sys.argv) > 2 else str(HERE / "AirtelSync_Business_Case.pptx"))
+         sys.argv[2] if len(sys.argv) > 2 else str(HERE / "UdyamSaathi_Business_Case.pptx"))

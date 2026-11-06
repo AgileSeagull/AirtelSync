@@ -1,4 +1,4 @@
-# AirtelSync
+# Udyam Saathi
 
 **From first question to an active business connection — no sales visit, no paperwork, in the owner's own language.**
 
@@ -22,9 +22,9 @@ Built for *Accel Business*, the case's fictional telecom operator serving India'
 |---|---|
 | Working prototype | This repo — [run it in 3 commands](#run-it) |
 | Demo video (≤ 3 min) | [Watch on Google Drive](https://drive.google.com/file/d/1-a3ST8SOD1w0_sS1sOaOeT6owczay4UK/view?usp=sharing) |
-| Business case (10 slides) | [AirtelSync_Business_Case.pdf](docs/deck/AirtelSync_Business_Case.pdf) |
-| Solution architecture | [AirtelSync_Solution_Architecture.pdf](docs/architecture/AirtelSync_Solution_Architecture.pdf) |
-| Privacy & security note | [AirtelSync_Privacy_Security_Note.pdf](docs/privacy/AirtelSync_Privacy_Security_Note.pdf) |
+| Business case (10 slides) | [UdyamSaathi_Business_Case.pdf](docs/deck/UdyamSaathi_Business_Case.pdf) |
+| Solution architecture | [UdyamSaathi_Solution_Architecture.pdf](docs/architecture/UdyamSaathi_Solution_Architecture.pdf) |
+| Privacy & security note | [UdyamSaathi_Privacy_Security_Note.pdf](docs/privacy/UdyamSaathi_Privacy_Security_Note.pdf) |
 
 ## The problem
 
@@ -39,7 +39,7 @@ The steepest drop is between needs assessment and quote acceptance, and 1,624 of
 lost to reasons a digital journey removes: no visit possible, slow or confusing quotes, paperwork, and
 installation delays or no fibre.
 
-## What AirtelSync does
+## What Udyam Saathi does
 
 1. **Discover.** The owner chats or speaks with an AI advisor in English, Hindi, Hinglish or another Indian
    language. About five questions; an optional GSTIN fills in the business details from the GST registry.
@@ -64,11 +64,11 @@ installation delays or no fibre.
 - **KYC that explains itself.** Every check gives a reason. Fixable problems go back to the owner in-app; only
   genuinely unclear cases reach a person.
 - **Privacy by design.** Purpose-wise DPDP consent, no ID numbers sent to the LLM, documents encrypted and deleted
-  once a decision is made, and an audit log of every decision. See the [privacy note](docs/privacy/AirtelSync_Privacy_Security_Note.pdf).
+  once a decision is made, and an audit log of every decision. See the [privacy note](docs/privacy/UdyamSaathi_Privacy_Security_Note.pdf).
 
 ## Architecture
 
-[![Solution architecture](docs/architecture/architecture_preview.png)](docs/architecture/AirtelSync_Solution_Architecture.pdf)
+[![Solution architecture](docs/architecture/architecture_preview.png)](docs/architecture/UdyamSaathi_Solution_Architecture.pdf)
 
 **Stack:** React + TypeScript PWA (Vite) · FastAPI (Python) · SQLite · Gemini API (Claude optional) ·
 Tesseract OCR · NumPy logistic regression. Government registries, DigiLocker, Aadhaar e-Sign and UPI AutoPay are
@@ -237,7 +237,7 @@ scripts/               dev server and end-to-end browser checks
 Rebuild the documents after changes:
 
 ```bash
-python docs/deck/build_deck.py "../Submission Template_Sync.pptx" docs/deck/AirtelSync_Business_Case.pptx
+python docs/deck/build_deck.py "../Submission Template_Sync.pptx" docs/deck/UdyamSaathi_Business_Case.pptx
 services/api/.venv/bin/python docs/architecture/render.py
 services/api/.venv/bin/python docs/privacy/render.py
 ```
@@ -247,4 +247,4 @@ services/api/.venv/bin/python docs/privacy/render.py
 
 Government registries, DigiLocker, Aadhaar e-Sign and UPI AutoPay are mocks built from the case data. The console
 uses a demo sign-in, and data lives in a local SQLite file. "Today" is fixed at **2026-07-15** to match the case
-data. The [privacy note](docs/privacy/AirtelSync_Privacy_Security_Note.pdf) lists what production would add.
+data. The [privacy note](docs/privacy/UdyamSaathi_Privacy_Security_Note.pdf) lists what production would add.
