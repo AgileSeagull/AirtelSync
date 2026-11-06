@@ -35,12 +35,13 @@ def cover(prs, blob):
                  size=11.5, color=RGBColor(0xEE, 0xEE, 0xEE), spacing=1.15), "rise", next(g), 700)
     sl.anim(box(sl, 0.65, 3.97, 0.5, 0.04, fill=RED, radius=0), "wipe", next(g), 500)
     light = RGBColor(0xC8, 0xC8, 0xC8)
-    tb = text(sl, 0.65, 4.1, 4.4, 0.9, [
+    tb = text(sl, 0.65, 4.1, 4.4, 1.1, [
         [("Team CTRL ALT ELITE", {"bold": True, "color": WHITE, "size": 10})],
         [("Vishal Dev Verma  ·  Kartik Patel", {})],
+        [("Vellore Institute of Technology", {})],
         [("▶  Watch the demo video (2:52)", {"bold": True, "color": WHITE})],
         [("Code: github.com/AgileSeagull/AirtelSync", {})]], size=8.5, color=light, spacing=1.25)
-    for i, url in ((2, VIDEO), (3, REPO)):  # transparent click areas keep the text white (text links render blue)
+    for i, url in ((3, VIDEO), (4, REPO)):  # transparent click areas keep the text white (text links render blue)
         hot = sl.s.shapes.add_shape(1, Inches(0.6), Inches(4.12 + i * 0.185), Inches(3.2), Inches(0.19))
         hot.fill.background()
         hot.line.fill.background()
